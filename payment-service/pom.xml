@@ -11,8 +11,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>customer-service</artifactId>
-    <description>Customer service</description>
+    <artifactId>payment-service</artifactId>
+    <description>Payment service</description>
 
     <build>
         <plugins>

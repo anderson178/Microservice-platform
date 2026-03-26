@@ -2,4 +2,5 @@
 !.idea/copyright
 logs/
 /customer-service/target
+/payment-service/target
 *.iml
