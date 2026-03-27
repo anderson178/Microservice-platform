@@ -1,12 +1,12 @@
-package com.iprody.crm.payment.crm.customer;
+package com.iprody.crm.customer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
+public class CustomerApp {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(CustomerApp.class, args);
         System.out.println("Customer service started!");
     }
 }
