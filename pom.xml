@@ -70,6 +70,41 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>3.2.4</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.3.1</version>
+
+                    <dependencies>
+                        <!-- Source: https://mvnrepository.com/artifact/com.puppycrawl.tools/checkstyle -->
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>12.3.1</version>
+                            <scope>compile</scope>
+                        </dependency>
+                    </dependencies>
+
+                    <configuration>
+                        <configLocation>checkstyle/sun_checks.xml</configLocation>
+                        <encoding>UTF-8</encoding>
+                        <consoleOutput>true</consoleOutput>
+                        <failsOnError>true</failsOnError>
+                        <linkXRef>false</linkXRef>
+
+                        <excludes>**/generated/**/*</excludes>
+                    </configuration>
+
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
