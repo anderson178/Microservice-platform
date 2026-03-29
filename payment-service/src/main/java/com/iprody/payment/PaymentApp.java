@@ -9,6 +9,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PaymentApp {
 
+    private PaymentApp() {
+    }
+
     /**
      * Start.
      *
