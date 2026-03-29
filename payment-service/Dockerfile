@@ -6,6 +6,11 @@ COPY target/*.jar app.jar
 
 ENV JAVA_TOOL_OPTIONS="-Xmx512m -Xms256m"
 
-EXPOSE 8081
+# nTLS
+EXPOSE 8080
+# TLS
+EXPOSE 8443
+# debug port
+EXPOSE 8005
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
