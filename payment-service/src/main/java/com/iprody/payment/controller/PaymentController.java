@@ -1,4 +1,4 @@
-package com.iprody.crm.payment.controller;
+package com.iprody.payment.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
