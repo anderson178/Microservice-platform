@@ -1,0 +1,11 @@
+name: 'Setup Common Environment'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set common env variables
+      shell: bash
+      run: |
+        echo "JAVA_VERSION=17" >> $GITHUB_ENV
+        echo "MAVEN_VERSION=3.9.6" >> $GITHUB_ENV
+        echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
