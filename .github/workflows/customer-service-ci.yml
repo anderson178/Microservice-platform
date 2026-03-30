@@ -1,0 +1,39 @@
+name: Customer Service
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'customer-service/**'
+      - 'pom.xml'
+      - '.github/workflows/**'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup common environment
+        uses: ./.github/actions/setup-common-env
+
+      - name: Debug environment
+        run: |
+          echo "JAVA_VERSION: $JAVA_VERSION"
+          echo "MAVEN_VERSION: $MAVEN_VERSION"
+          echo "REGISTRY: $REGISTRY"
+
+      - name: Set up JDK ${{env.JAVA_VERSION}}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{env.JAVA_VERSION}}
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package -P customer-service
+        working-directory: ./

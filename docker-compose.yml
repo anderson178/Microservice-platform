@@ -1,0 +1,230 @@
+services:
+  payment-service:
+    build:
+      context: .
+      dockerfile: payment-service/Dockerfile
+    container_name: payment-service
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "8005:5005"
+    depends_on:
+      payment-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-postgres:
+    image: postgres:16-alpine
+    container_name: payment-postgres
+    environment:
+      - POSTGRES_DB=payment
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - payment-postgres_data:/var/lib/postgresql/data
+    ports:
+      - "8432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d payment" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  payment-keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    command: [ "start-dev", "--import-realm" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./payment-service/keycloak:/opt/keycloak/data/import:ro
+      - payment-keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: customer-service/Dockerfile
+    container_name: customer-service
+    ports:
+      - "9080:8080"
+      - "9443:8443"
+      - "9005:5005"
+    depends_on:
+      customer-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  customer-postgres:
+    image: postgres:16-alpine
+    container_name: customer-postgres
+    environment:
+      - POSTGRES_DB=customer
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - customer-postgres_data:/var/lib/postgresql/data
+    ports:
+      - "9432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d customer" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  customer-keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: customer-keycloak
+    command: [ "start-dev", "--import-realm" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "9082:8080"
+    volumes:
+      - ./customer-service/keycloak:/opt/keycloak/data/import:ro
+      - customer-keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  inquiry-service:
+    build:
+      context: .
+      dockerfile: inquiry-service/Dockerfile
+    container_name: inquiry-service
+    ports:
+      - "7080:8080"
+      - "7443:8443"
+      - "7005:5005"
+    depends_on:
+      inquiry-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  inquiry-postgres:
+    image: postgres:16-alpine
+    container_name: inquiry-postgres
+    environment:
+      - POSTGRES_DB=inquiry
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - inquiry-postgres_data:/var/lib/postgresql/data
+    ports:
+      - "7432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d inquiry" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  inquiry-keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: inquiry-keycloak
+    command: [ "start-dev", "--import-realm" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "7082:8080"
+    volumes:
+      - ./inquiry-service/keycloak:/opt/keycloak/data/import:ro
+      - inquiry-keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    container_name: inventory-service
+    ports:
+      - "6080:8080"
+      - "6443:8443"
+      - "6005:5005"
+    depends_on:
+      inventory-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  inventory-postgres:
+    image: postgres:16-alpine
+    container_name: inventory-postgres
+    environment:
+      - POSTGRES_DB=inventory
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - inventory-postgres_data:/var/lib/postgresql/data
+    ports:
+      - "6432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d inventory" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  inventory-keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: inventory-keycloak
+    command: [ "start-dev", "--import-realm" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "6082:8080"
+    volumes:
+      - ./inventory-service/keycloak:/opt/keycloak/data/import:ro
+      - inventory-keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+
+volumes:
+  payment-postgres_data:
+  payment-keycloak_data:
+  customer-postgres_data:
+  customer-keycloak_data:
+  inquiry-postgres_data:
+  inquiry-keycloak_data:
+  inventory-postgres_data:
+  inventory-keycloak_data:
