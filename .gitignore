@@ -3,4 +3,7 @@
 logs/
 /customer-service/target
 /payment-service/target
+/inquiry-service/target
+/inventory-service/target
 *.iml
+.env

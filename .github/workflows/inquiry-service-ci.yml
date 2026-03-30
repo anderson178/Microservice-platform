@@ -1,11 +1,11 @@
-name: Payment Service
+name: Inquiry Service
 
 on:
   push:
     branches:
       - develop
     paths:
-      - 'payment-service/**'
+      - 'inquiry-service/**'
       - 'pom.xml'
       - '.github/workflows/**'
 
@@ -35,5 +35,5 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn clean package -P payment-service
+        run: mvn clean package -P inquiry-service
         working-directory: ./

@@ -6,6 +6,12 @@
     <artifactId>root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <modules>
+        <module>customer-service</module>
+        <module>inquiry-service</module>
+        <module>inventory-service</module>
+        <module>payment-service</module>
+    </modules>
 
     <properties>
         <java.version>17</java.version>
@@ -22,6 +28,18 @@
             <id>customer-service</id>
             <modules>
                 <module>customer-service</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>inquiry-service</id>
+            <modules>
+                <module>inquiry-service</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>inventory-service</id>
+            <modules>
+                <module>inventory-service</module>
             </modules>
         </profile>
     </profiles>
@@ -86,7 +104,6 @@
 
                     <configuration>
                         <configLocation>checkstyle/sun_checks.xml</configLocation>
-                        <encoding>UTF-8</encoding>
                         <consoleOutput>true</consoleOutput>
                         <failsOnError>true</failsOnError>
                         <linkXRef>false</linkXRef>
