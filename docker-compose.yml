@@ -4,7 +4,7 @@ services:
   payment-service:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: payment-service/Dockerfile
     container_name: payment-service
     ports:
       - "8080:8080"
