@@ -1,10 +1,10 @@
-package com.iprody;
+package com.iprody.inquiry;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Start customer app class.
+ * Start inquiry app class.
  */
 @SpringBootApplication
 public class InquiryApp {

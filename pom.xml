@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>inquiry-service</module>
+        <module>inventory-service</module>
     </modules>
 
     <properties>
@@ -31,6 +32,12 @@
             <id>inquiry-service</id>
             <modules>
                 <module>inquiry-service</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>inventory-service</id>
+            <modules>
+                <module>inventory-service</module>
             </modules>
         </profile>
     </profiles>

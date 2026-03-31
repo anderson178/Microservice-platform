@@ -155,7 +155,61 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  inventory-service:
+    build:
+      context: .
+      dockerfile: inventory-service/Dockerfile
+    container_name: inventory-service
+    ports:
+      - "7080:8080"
+      - "7443:8443"
+      - "7005:5005"
+    depends_on:
+      inquiry-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  inventory-postgres:
+    image: postgres:16-alpine
+    container_name: inventory-postgres
+    environment:
+      - POSTGRES_DB=inventory
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - inventory-postgres_data:/var/lib/postgresql/data
+    ports:
+      - "6432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d inventory" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  inventory-keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: inventory-keycloak
+    command: [ "start-dev" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "6082:8080"
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+
 volumes:
   payment-postgres_data:
   customer-postgres_data:
   inquiry-postgres_data:
+  inventory-postgres_data:
