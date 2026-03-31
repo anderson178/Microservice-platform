@@ -4,3 +4,4 @@ logs/
 /customer-service/target
 /payment-service/target
 *.iml
+.env
