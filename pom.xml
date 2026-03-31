@@ -6,6 +6,9 @@
     <artifactId>root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <modules>
+        <module>inquiry-service</module>
+    </modules>
 
     <properties>
         <java.version>17</java.version>
@@ -22,6 +25,12 @@
             <id>customer-service</id>
             <modules>
                 <module>customer-service</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>inquiry-service</id>
+            <modules>
+                <module>inquiry-service</module>
             </modules>
         </profile>
     </profiles>

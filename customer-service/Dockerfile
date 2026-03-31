@@ -22,6 +22,6 @@ EXPOSE 8080
 # TLS
 EXPOSE 8443
 # debug port
-EXPOSE 8005
+EXPOSE 5005
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
