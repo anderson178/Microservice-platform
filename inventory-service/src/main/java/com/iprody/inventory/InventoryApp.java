@@ -18,6 +18,6 @@ public class InventoryApp {
      */
     public static void main(final String[] args) {
         SpringApplication.run(InventoryApp.class, args);
-        System.out.println("Payment service started! ");
+        System.out.println("Inventory service started! ");
     }
 }

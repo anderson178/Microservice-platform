@@ -25,7 +25,7 @@ services:
     ports:
       - "8432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d payment_db" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d payment" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -161,11 +161,11 @@ services:
       dockerfile: inventory-service/Dockerfile
     container_name: inventory-service
     ports:
-      - "7080:8080"
-      - "7443:8443"
-      - "7005:5005"
+      - "6080:8080"
+      - "6443:8443"
+      - "6005:5005"
     depends_on:
-      inquiry-postgres:
+      inventory-postgres:
         condition: service_healthy
     restart: unless-stopped
 

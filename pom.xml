@@ -7,8 +7,10 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>customer-service</module>
         <module>inquiry-service</module>
         <module>inventory-service</module>
+        <module>payment-service</module>
     </modules>
 
     <properties>
