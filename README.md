@@ -6,13 +6,13 @@
 
 **Common database configuration**</br>
 ```
-- DB_USER=
-- DB_PASSWORD=
-- DB_PORT=
+DB_USER=
+DB_PASSWORD=
+DB_PORT=
 ```
 **Common keycloak configuration**</br>
 ```
-- KEYCLOAK_ADMIN=
-- KEYCLOAK_ADMIN_PASSWORD=
-- KEYCLOAK_DEF_USER_PASSWORD=
+KEYCLOAK_ADMIN=
+KEYCLOAK_ADMIN_PASSWORD=
+KEYCLOAK_DEF_USER_PASSWORD=
 ```
