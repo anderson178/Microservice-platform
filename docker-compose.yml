@@ -8,6 +8,10 @@ services:
       - "8080:8080"
       - "8443:8443"
       - "8005:5005"
+    environment:
+        - SPRING_PROFILES_ACTIVE=docker
+        - DB_USER=${DB_USER}
+        - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       payment-postgres:
         condition: service_healthy
@@ -22,6 +26,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - payment-postgres_data:/var/lib/postgresql/data
+      - ./payment-service/init-db:/docker-entrypoint-initdb.d:ro
     ports:
       - "8432:5432"
     healthcheck:
