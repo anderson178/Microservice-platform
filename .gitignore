@@ -1,9 +1,6 @@
 .idea/*
 !.idea/copyright
 logs/
-/customer-service/target
-/payment-service/target
-/inquiry-service/target
-/inventory-service/target
+target/
 *.iml
 .env

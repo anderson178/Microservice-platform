@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS payment;
+GRANT ALL ON SCHEMA payment TO postgres;
