@@ -24,16 +24,4 @@ public class PaymentTestData {
 
         return payment;
     }
-
-//    public static Payment createPayment(PaymentStatus status, Instant createdAt) {
-//        return Payment.builder()
-//                .id(UUID.randomUUID())
-//                .inquiryRefId(UUID.randomUUID())
-//                .amount(1500)
-//                .currency("USD")
-//                .status(status)
-//                .createdAt(Timestamp.from(createdAt))
-//                .updatedAt(Timestamp.from(Instant.now()))
-//                .build();
-//    }
 }

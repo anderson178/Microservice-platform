@@ -30,7 +30,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Sql(scripts = {"/sql/init-schema.sql"})
 class PaymentRepoTest {
     @Container
-    @ServiceConnection // Автоматически подставит url/username/password в Spring
+    @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withInitScript("sql/init-schema.sql");
 
