@@ -9,11 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "customer", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CustomerController {
 
-    /**
-     *  Simple hello.
-     *
-     *  @return - hello
-     */
     @GetMapping
     public String hello() {
         return "Hello World";

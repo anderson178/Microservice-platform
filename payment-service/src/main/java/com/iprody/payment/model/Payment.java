@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -44,6 +46,7 @@ public class Payment {
     @Column(name = "NOTE")
     private String note;
 
+    @Generated(event = EventType.INSERT)
     @Column(name = "CREATED_AT", nullable = false)
     private Timestamp createdAt;
 

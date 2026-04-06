@@ -14,4 +14,8 @@ public final class PageUtils {
                 Sort.by(sorting.getSortDirection(), ((SortableField) sorting.getSortField()).getSortableAttribute())
         );
     }
+
+    public static PageRequest of(Pagination pagination) {
+        return PageRequest.of(pagination.getOffset(), pagination.getLimit());
+    }
 }

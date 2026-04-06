@@ -14,6 +14,14 @@
     <artifactId>customer-service</artifactId>
     <description>Customer service</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.iprody</groupId>
+            <artifactId>common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
