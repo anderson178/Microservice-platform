@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://inventory-postgres:5432/inventory
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    org.hibernate.SQL: INFO

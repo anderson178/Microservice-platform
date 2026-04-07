@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS inventory;
+GRANT ALL ON SCHEMA inventory TO postgres;
