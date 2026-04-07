@@ -7,10 +7,6 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>customer-service</module>
-        <module>inquiry-service</module>
-        <module>inventory-service</module>
-        <module>payment-service</module>
         <module>common</module>
     </modules>
 
@@ -25,13 +21,11 @@
             <id>payment-service</id>
             <modules>
                 <module>payment-service</module>
-                <module>common</module>
             </modules>
         </profile>
         <profile>
             <id>customer-service</id>
             <modules>
-                <module>common</module>
                 <module>customer-service</module>
             </modules>
         </profile>
@@ -39,14 +33,12 @@
             <id>inquiry-service</id>
             <modules>
                 <module>inquiry-service</module>
-                <module>common</module>
             </modules>
         </profile>
         <profile>
             <id>inventory-service</id>
             <modules>
                 <module>inventory-service</module>
-                <module>common</module>
             </modules>
         </profile>
     </profiles>
