@@ -1,5 +1,5 @@
 databaseChangeLog:
-  - - changeSet:
+  - changeSet:
         id: 000-create-payment-schema
         author: mironenko
         runInTransaction: false

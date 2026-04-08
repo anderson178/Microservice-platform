@@ -1,4 +1,4 @@
-package com.iprody.inventory;
+package com.iprody.inventory.controller;
 
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,11 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "inventory", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InventoryController {
 
-    /**
-     *  Simple hello.
-     *
-     *  @return - hello
-     */
     @GetMapping
     public String hello() {
         return "Hello World";

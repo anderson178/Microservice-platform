@@ -1,2 +1,17 @@
 server:
   port: 8080
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: inventory
+
+  liquibase:
+    enabled: true
+    change-log: db/changelog-cumulative.yaml
+    default-schema: inventory
+    contexts: development

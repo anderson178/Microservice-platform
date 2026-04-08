@@ -2,11 +2,13 @@ package com.iprody.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 @Getter
+@ToString
 @AllArgsConstructor
 public class ResultList<T> {
     private List<T> elements;

@@ -182,6 +182,10 @@ services:
       - "6080:8080"
       - "6443:8443"
       - "6005:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       inventory-postgres:
         condition: service_healthy
@@ -196,6 +200,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - inventory-postgres_data:/var/lib/postgresql/data
+      - ./inventory-service/init-db:/docker-entrypoint-initdb.d:ro
     ports:
       - "6432:5432"
     healthcheck:
