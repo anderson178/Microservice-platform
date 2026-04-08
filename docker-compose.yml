@@ -67,6 +67,10 @@ services:
       - "9080:8080"
       - "9443:8443"
       - "9005:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       customer-postgres:
         condition: service_healthy
@@ -81,6 +85,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - customer-postgres_data:/var/lib/postgresql/data
+      - ./customer-service/init-db:/docker-entrypoint-initdb.d:ro
     ports:
       - "9432:5432"
     healthcheck:

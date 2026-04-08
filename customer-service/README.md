@@ -16,7 +16,7 @@ mvn clean package -P customer-service
 **Сборка и запуск образов**<br>
 Запуск из корня проекта
 ```
-docker compose up -d --build payment-service
-docker compose up -d --build payment-postgres
-docker compose up -d --build payment-keycloak
+docker compose up -d --build customer-service
+docker compose up -d --build customer-postgres
+docker compose up -d --build customer-keycloak
 ```

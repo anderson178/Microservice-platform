@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.1 - create schema 'CUSTOMER'
+      author: mironenko
+      runInTransaction: false
+      changes:
+        - sql:
+            sql: CREATE SCHEMA IF NOT EXISTS customer;
+            rollback: DROP SCHEMA IF EXISTS customer CASCADE;
