@@ -38,7 +38,7 @@ class GroupServiceTest {
     @Test
     void findById_Success() {
         UUID id = UUID.randomUUID();
-        Group group = new Group(); // Предположим, есть пустой конструктор
+        Group group = new Group();
         when(groupRepo.findById(id)).thenReturn(Optional.of(group));
 
         Group result = groupService.findById(id);
@@ -91,7 +91,7 @@ class GroupServiceTest {
         filter.setGroupRefId(refId);
         filter.setIsAvailFreePlaces(true);
 
-        Pagination pagination = new Pagination(0, 10); // Допустим, ваши поля page=0, size=10
+        Pagination pagination = new Pagination(0, 10);
 
         Group group = new Group();
         Page<Group> mockPage = new PageImpl<>(List.of(group), PageRequest.of(0, 10), 1);
@@ -102,7 +102,7 @@ class GroupServiceTest {
         ResultList<Group> result = groupService.findAllByFilter(filter, pagination);
 
         assertNotNull(result);
-        assertEquals(1, result.getElements().size()); // Проверяем, что данные дошли
+        assertEquals(1, result.getElements().size());
 
         verify(groupRepo).findAllByFilter(eq(refId), eq(true), any());
     }

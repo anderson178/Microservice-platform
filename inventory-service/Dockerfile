@@ -8,7 +8,6 @@ COPY inventory-service/pom.xml inventory-service/
 COPY inventory-service/src inventory-service/src
 COPY checkstyle/sun_checks.xml checkstyle/
 
-# ✅ Добавили -P inventory-service
 RUN mvn -B dependency:go-offline -pl inventory-service -am -P inventory-service -f pom.xml
 RUN mvn clean package -DskipTests -pl inventory-service -am -P inventory-service -f pom.xml
 
