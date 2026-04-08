@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.1 - add table 'inquiry'
+      author: mironenko
+      changes:
+        - createTable:
+            tableName: inquiry
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: product_ref_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: customer_ref_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: group_ref_id
+                  type: UUID
+              - column:
+                  name: manager_ref_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: source
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: VARCHAR(255)
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: note
+                  type: VARCHAR(255)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+            rollback:
+              - dropTable:
+                  tableName: inquiry

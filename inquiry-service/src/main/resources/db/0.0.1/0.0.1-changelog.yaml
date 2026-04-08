@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: 0.0.1-add_schema.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: 0.0.1-add_inquiry_table.yaml
+      relativeToChangelogFile: true
