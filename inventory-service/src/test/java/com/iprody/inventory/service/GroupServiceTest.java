@@ -102,7 +102,7 @@ class GroupServiceTest {
         ResultList<Group> result = groupService.findAllByFilter(filter, pagination);
 
         assertNotNull(result);
-        assertEquals(1, result.getElements().size());
+        assertEquals(1, result.getData().size());
 
         verify(groupRepo).findAllByFilter(eq(refId), eq(true), any());
     }
@@ -117,7 +117,7 @@ class GroupServiceTest {
 
         ResultList<Group> result = groupService.findAllByFilter(filter, pagination);
 
-        assertTrue(result.getElements().isEmpty());
+        assertTrue(result.getData().isEmpty());
         verify(groupRepo, times(1)).findAllByFilter(any(), any(), any());
     }
 }

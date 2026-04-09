@@ -3,6 +3,7 @@ package com.iprody.customer.service;
 import com.iprody.common.Pagination;
 import com.iprody.common.ResultCode;
 import com.iprody.common.ResultList;
+import com.iprody.common.Sorting;
 import com.iprody.common.exception.AppException;
 import com.iprody.customer.model.*;
 import com.iprody.customer.repository.ContractRepo;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +93,7 @@ class CustomerServiceTest {
         CustomerFilter filter = new CustomerFilter();
         filter.setFullName(fullName);
         Pagination pagination = new Pagination(0, 10);
+        Sorting sorting = new Sorting(CustomerSortField.FULL_NAME, Sort.Direction.DESC);
         Customer customer = new Customer();
         customer.setFullName(fullName);
         Page<Customer> customerPage = new PageImpl<>(List.of(customer));
@@ -98,11 +101,11 @@ class CustomerServiceTest {
         when(customerRepo.findAllByFullNameContainingIgnoreCase(eq(fullName), any(Pageable.class)))
                 .thenReturn(customerPage);
 
-        ResultList<Customer> result = customerService.findAllByFilter(filter, pagination);
+        ResultList<Customer> result = customerService.findAllByFilter(filter, pagination, sorting);
 
         assertNotNull(result);
-        assertEquals(1, result.getElements().size());
-        assertEquals(fullName, result.getElements().get(0).getFullName());
+        assertEquals(1, result.getData().size());
+        assertEquals(fullName, result.getData().get(0).getFullName());
         verify(customerRepo).findAllByFullNameContainingIgnoreCase(eq(fullName), any(Pageable.class));
     }
 

@@ -1,9 +1,6 @@
 package com.iprody.customer.service;
 
-import com.iprody.common.PageUtils;
-import com.iprody.common.Pagination;
-import com.iprody.common.ResultCode;
-import com.iprody.common.ResultList;
+import com.iprody.common.*;
 import com.iprody.common.exception.AppException;
 import com.iprody.customer.model.*;
 import com.iprody.customer.repository.ContractRepo;
@@ -34,10 +31,10 @@ public class CustomerService {
         return customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND));
     }
 
-    public ResultList<Customer> findAllByFilter(CustomerFilter filter, Pagination pagination) {
+    public ResultList<Customer> findAllByFilter(CustomerFilter filter, Pagination pagination, Sorting sorting) {
         return ResultList.from(customerRepo.findAllByFullNameContainingIgnoreCase(
                 filter.getFullName(),
-                PageUtils.of(pagination))
+                PageUtils.of(pagination, sorting))
         );
     }
 

@@ -1,0 +1,37 @@
+### getById
+GET http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+
+### save
+POST http://localhost:8080/api/v1/customers
+Content-Type: application/json
+
+{
+  "fullName": "DenisM3",
+  "contract": {
+    "email": "124@mail.ru3",
+    "phoneNumber": "+71234567893"
+  }
+}
+
+### update
+PUT http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+Content-Type: application/json
+
+{
+  "pagination": {
+    "offset": 9007199254740991,
+    "limit": 1073741824
+  },
+  "sorting": "FULL_NAME",
+  "filter": {
+    "fullName": "string"
+  }
+}
+
+### search
+GET http://localhost:8080/api/v1/customers/search
+    ?pagination.offset=0
+    &pagination.limit=10
+    &filter.fullName=DenisM
+    &sorting.sortField=FULL_NAME
+    &sorting.sortDirection=ASC
