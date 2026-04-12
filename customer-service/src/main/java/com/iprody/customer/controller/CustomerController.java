@@ -10,6 +10,7 @@ import com.iprody.customer.service.CustomerService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class CustomerController {
     }
 
     @PostMapping
-    public CustomerDto save(@RequestBody CustomerDataDto dto) {
+    public CustomerDto save(@Valid @RequestBody CustomerDataDto dto) {
         return CustomerMapper.INSTANCE.toDto(
                 customerService.save(
                         CustomerMapper.INSTANCE.toData(dto)
@@ -45,7 +46,7 @@ public class CustomerController {
 
     @PutMapping("/{id}")
     public CustomerDto update(@PathVariable UUID id,
-                              @RequestBody CustomerDataDto dto) {
+                              @Valid @RequestBody CustomerDataDto dto) {
         return CustomerMapper.INSTANCE.toDto(
                 customerService.update(
                         id,

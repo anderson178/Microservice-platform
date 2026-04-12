@@ -22,7 +22,7 @@ public class CustomerService {
     @Transactional
     public Customer save(CustomerData customerData) {
         ContractData contractData = customerData.getContract();
-        Contract contractSaved = contractRepo.save(new Contract(contractData.getEmail(), customerData.getFullName()));
+        Contract contractSaved = contractRepo.save(new Contract(contractData.getEmail(), contractData.getPhoneNumber()));
         return customerRepo.save(new Customer(customerData.getFullName(), contractSaved));
     }
 
