@@ -1,9 +1,7 @@
 package com.iprody.inquiry.service;
 
-import com.iprody.common.PageUtils;
-import com.iprody.common.Pagination;
-import com.iprody.common.ResultList;
-import com.iprody.common.Sorting;
+import com.iprody.common.*;
+import com.iprody.common.exception.AppException;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryData;
@@ -30,7 +28,7 @@ public class InquiryService {
 
     @Transactional(readOnly = true)
     public Inquiry findById(UUID id) {
-        return inquiryRepo.findById(id).orElse(null);
+        return inquiryRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND));
     }
 
     @Transactional
