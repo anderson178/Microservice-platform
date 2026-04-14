@@ -47,7 +47,7 @@ public class PaymentServiceTest {
                 getFilter(),
                 new Pagination(0, 10),
                 new Sorting(PaymentSortField.STATUS, Sort.Direction.DESC));
-        assertThat(result.getElements()).hasSize(1);
+        assertThat(result.getData()).hasSize(1);
         assertThat(result.getTotalCount()).isEqualTo(1);
         verify(paymentRepo, times(1)).findAllByFilter(any(), any(), any(), any(), any(), any());
     }
@@ -60,7 +60,7 @@ public class PaymentServiceTest {
                 getFilter(),
                 new Pagination(0, 10),
                 new Sorting(PaymentSortField.STATUS, Sort.Direction.DESC));
-        assertThat(result.getElements()).isEmpty();
+        assertThat(result.getData()).isEmpty();
         assertThat(result.getTotalCount()).isZero();
     }
 

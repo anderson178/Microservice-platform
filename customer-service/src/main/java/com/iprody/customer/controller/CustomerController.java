@@ -1,16 +1,68 @@
 package com.iprody.customer.controller;
 
+import com.iprody.common.CommonMapper;
+import com.iprody.common.ResultList;
+import com.iprody.customer.dto.CustomerDataDto;
+import com.iprody.customer.dto.CustomerDto;
+import com.iprody.customer.dto.CustomerRecordRequestDto;
+import com.iprody.customer.mapper.CustomerMapper;
+import com.iprody.customer.service.CustomerService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
+@Tag(name = "API for customers")
+@ApiResponses(
+        value = {
+                @ApiResponse(responseCode = "400", description = "Bad request"),
+                @ApiResponse(responseCode = "404", description = "Not found"),
+                @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
+@RequiredArgsConstructor
 @RestController
-@RequestMapping(value = "customer", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/customers", produces = MediaType.APPLICATION_JSON_VALUE)
 public class CustomerController {
+    private final CustomerService customerService;
 
-    @GetMapping
-    public String hello() {
-        return "Hello World";
+    @GetMapping("/{id}")
+    public CustomerDto getById(@PathVariable UUID id) {
+        return CustomerMapper.INSTANCE.toDto(customerService.findById(id));
+    }
+
+    @PostMapping
+    public CustomerDto save(@Valid @RequestBody CustomerDataDto dto) {
+        return CustomerMapper.INSTANCE.toDto(
+                customerService.save(
+                        CustomerMapper.INSTANCE.toData(dto)
+                )
+        );
+    }
+
+    @PutMapping("/{id}")
+    public CustomerDto update(@PathVariable UUID id,
+                              @Valid @RequestBody CustomerDataDto dto) {
+        return CustomerMapper.INSTANCE.toDto(
+                customerService.update(
+                        id,
+                        CustomerMapper.INSTANCE.toData(dto)
+                )
+        );
+    }
+
+    @GetMapping("/search")
+    public ResultList<CustomerDto> findAllByFilter(CustomerRecordRequestDto customerRecordRequestDto) {
+        return CustomerMapper.INSTANCE.toDtoList(
+                customerService.findAllByFilter(
+                        CustomerMapper.INSTANCE.toFilter(customerRecordRequestDto.getFilter()),
+                        CommonMapper.INSTANCE.toPagination(customerRecordRequestDto.getPagination()),
+                        CustomerMapper.INSTANCE.toSorting(customerRecordRequestDto.getSorting())
+                )
+        );
     }
 }
