@@ -1,6 +1,7 @@
 package com.iprody.inquiry.repository;
 
 import com.iprody.inquiry.model.Inquiry;
+import com.iprody.inquiry.model.InquiryStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +21,7 @@ public interface InquiryRepo extends JpaRepository<Inquiry, UUID> {
             and (:managerRefId is null or inq.managerRefId = :managerRefId)
             """)
     Page<Inquiry> findAllByFilter(
-            @Param("status") String status,
+            @Param("status") InquiryStatus status,
             @Param("customerRefId") UUID customerRefId,
             @Param("managerRefId") UUID managerRefId,
             Pageable pageable
