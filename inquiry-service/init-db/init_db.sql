@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS inquiry;
+GRANT ALL ON SCHEMA inquiry TO postgres;

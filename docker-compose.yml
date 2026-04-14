@@ -127,6 +127,10 @@ services:
       - "7080:8080"
       - "7443:8443"
       - "7005:5005"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       inquiry-postgres:
         condition: service_healthy
@@ -141,6 +145,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - inquiry-postgres_data:/var/lib/postgresql/data
+      - ./inquiry-service/init-db:/docker-entrypoint-initdb.d:ro
     ports:
       - "7432:5432"
     healthcheck:
