@@ -44,7 +44,7 @@ public class InquiryService {
     @Transactional(readOnly = true)
     public ResultList<Inquiry> findAllByFilter(InquiryFilter filter, Pagination pagination, Sorting sorting) {
         return ResultList.from(inquiryRepo.findAllByFilter(
-                filter.getStatus() != null ? filter.getStatus().name() : null,
+                filter.getStatus(),
                 filter.getCustomerRefId(),
                 filter.getManagerRefId(),
                 PageUtils.of(pagination, sorting))

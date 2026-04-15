@@ -180,15 +180,15 @@ class InquiryServiceTest {
             filter.setStatus(InquiryStatus.NEW);
 
             Page<Inquiry> mockPage = new PageImpl<>(List.of(new Inquiry()));
-            when(inquiryRepo.findAllByFilter(anyString(), any(), any(), any())).thenReturn(mockPage);
+            when(inquiryRepo.findAllByFilter(any(), any(), any(), any())).thenReturn(mockPage);
 
             ResultList<Inquiry> result = inquiryService.findAllByFilter(
                     filter,
                     new Pagination(0, 10),
                     new Sorting(InquirySortField.STATUS, Sort.Direction.DESC));
 
-            assertThat(result.getElements()).hasSize(1);
-            verify(inquiryRepo).findAllByFilter(eq("NEW"), any(), any(), any());
+            assertThat(result.getData()).hasSize(1);
+            verify(inquiryRepo).findAllByFilter(eq(InquiryStatus.NEW), any(), any(), any());
         }
 
         @Test
@@ -227,15 +227,15 @@ class InquiryServiceTest {
             InquiryFilter filter = new InquiryFilter();
             filter.setStatus(InquiryStatus.NEW);
             Page<Inquiry> emptyPage = new PageImpl<>(List.of());
-            when(inquiryRepo.findAllByFilter(anyString(), any(), any(), any())).thenReturn(emptyPage);
+            when(inquiryRepo.findAllByFilter(any(), any(), any(), any())).thenReturn(emptyPage);
 
             ResultList<Inquiry> result = inquiryService.findAllByFilter(
                     filter, new
                             Pagination(0, 10),
                     new Sorting(InquirySortField.STATUS, Sort.Direction.DESC));
 
-            assertThat(result.getElements()).isEmpty();
-            verify(inquiryRepo).findAllByFilter(anyString(), any(), any(), any());
+            assertThat(result.getData()).isEmpty();
+            verify(inquiryRepo).findAllByFilter(any(), any(), any(), any());
         }
     }
 }

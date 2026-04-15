@@ -1,13 +1,14 @@
-package com.iprody.inquiry.model;
+package com.iprody.inquiry.dto;
 
+import com.iprody.inquiry.model.InquiryStatus;
 import lombok.Data;
 
 import java.util.UUID;
 
 @Data
-public class InquiryData {
+public class InquiryFilterDto {
+    private InquiryStatus status;
     private UUID productRefId;
     private UUID customerRefId;
     private UUID managerRefId;
-    private String source;
 }

@@ -28,7 +28,7 @@ public class Inquiry {
     @Column(name = "manager_ref_id", nullable = false)
     private UUID managerRefId;
 
-    // max-length 100, not-null)
+    // max-length 100)
     @Column(name = "source", nullable = false)
     private String source;
 

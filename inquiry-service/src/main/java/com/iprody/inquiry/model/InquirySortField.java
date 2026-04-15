@@ -3,7 +3,7 @@ package com.iprody.inquiry.model;
 import com.iprody.common.SortableField;
 
 public enum InquirySortField implements SortableField {
-    STATUS("paymentStatus"),
+    STATUS("status"),
     CREATED_AT("createdAt");
 
     private final String fieldName;
