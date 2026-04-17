@@ -16,6 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.ResourceAccessException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
@@ -30,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(InquiryController.class)
 @Import(ConfigurationTest.class)
-@DisplayName("CustomerController tests")
+@DisplayName("InquiryController tests")
 class InquiryControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -98,6 +99,29 @@ class InquiryControllerTest {
                     .andExpect(status().isBadRequest());
 
             verifyNoInteractions(inquiryService);
+        }
+
+        @Test
+        @DisplayName("424 when external service is unavailable")
+        void save_externalServiceUnavailable_returns424() throws Exception {
+            InquiryDataDto validDto = new InquiryDataDto();
+            validDto.setProductRefId(UUID.randomUUID());
+            validDto.setCustomerRefId(UUID.randomUUID());
+            validDto.setManagerRefId(UUID.randomUUID());
+            validDto.setSource("WEB");
+
+            when(inquiryService.save(any()))
+                    .thenThrow(new ResourceAccessException("Connection refused: http://external-payment-service/api"));
+
+            mockMvc.perform(post("/api/v1/inquires")
+                            .contentType(MediaType.APPLICATION_JSON.toString())
+                            .content(objectMapper.writeValueAsString(validDto)))
+                    .andExpect(status().isFailedDependency())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON.toString()))
+                    .andExpect(jsonPath("$.code").value(ResultCode.EXTERNAL_SERVICE_UNAVAILABLE.name()))
+                    .andExpect(jsonPath("$.message").isNotEmpty());
+
+            verify(inquiryService).save(any());
         }
     }
 

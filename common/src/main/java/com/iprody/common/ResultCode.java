@@ -12,7 +12,8 @@ public enum ResultCode {
     INCORRECT_PARAMS("Params is incorrected", HttpStatus.BAD_REQUEST),
     BAD_REQUEST("Bad request", HttpStatus.BAD_REQUEST),
     INTERNAL_SERVER_ERROR("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
-    VALIDATION_ERROR("Validation error", HttpStatus.BAD_REQUEST);
+    VALIDATION_ERROR("Validation error", HttpStatus.BAD_REQUEST),
+    EXTERNAL_SERVICE_UNAVAILABLE("Dependent service is currently unavailable", HttpStatus.FAILED_DEPENDENCY);
 
     private final String defaultMessage;
     private final HttpStatus httpStatus;

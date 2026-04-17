@@ -119,9 +119,9 @@ class CustomerRepoTest {
         Contract invalidContract = new Contract(null, "+79991234567");
         Customer invalidCustomer = new Customer("Test", invalidContract);
 
-        assertThatThrownBy(() -> customerRepo.save(invalidCustomer))
+        assertThatThrownBy(() -> customerRepo.saveAndFlush(invalidCustomer))
                 .isInstanceOf(DataIntegrityViolationException.class)
-                .hasMessageContaining("not-null property references a null or transient value for entity com.iprody.customer.model.Contract.email");
+                .hasMessageContaining("null value in column \"email\" of relation \"contract\" violates not-null constraint");
     }
 
     @Test

@@ -48,14 +48,14 @@ class CustomerControllerTest {
         @Test
         @DisplayName("400 when fullName is blank")
         void save_NullFullName_returns400() throws Exception {
-            CustomerDataDto invalidDto = new CustomerDataDto(""); // fullName = null
+            CustomerDataDto invalidDto = new CustomerDataDto("");
 
             mockMvc.perform(post("/api/v1/customers")
                             .contentType(MediaType.APPLICATION_JSON.toString())
                             .content(objectMapper.writeValueAsString(invalidDto)))
                     .andExpect(status().isBadRequest())
                     .andExpect(content().contentType(MediaType.APPLICATION_JSON.toString()))
-                    .andExpect(jsonPath("$.code").value(ResultCode.BAD_REQUEST.name()))
+                    .andExpect(jsonPath("$.code").value(ResultCode.VALIDATION_ERROR.name()))
                     .andExpect(jsonPath("$.message").value(containsString("fullName=must not be blank")));
 
             verifyNoInteractions(customerService);
@@ -102,7 +102,7 @@ class CustomerControllerTest {
             CustomerDataDto dto = new CustomerDataDto("Updated Name");
 
             when(customerService.update(eq(id), any()))
-                    .thenThrow(new AppException(ResultCode.NOT_FOUND));
+                    .thenThrow(new AppException(ResultCode.NOT_FOUND, id));
 
             mockMvc.perform(put("/api/v1/customers/{id}", id)
                             .contentType(MediaType.APPLICATION_JSON.toString())
@@ -157,7 +157,7 @@ class CustomerControllerTest {
         void getById_NotFound_returns404() throws Exception {
             UUID nonExistentId = UUID.randomUUID();
             when(customerService.findById(nonExistentId))
-                    .thenThrow(new AppException(ResultCode.NOT_FOUND));
+                    .thenThrow(new AppException(ResultCode.NOT_FOUND, nonExistentId));
 
             mockMvc.perform(get("/api/v1/customers/{id}", nonExistentId))
                     .andExpect(status().isNotFound())

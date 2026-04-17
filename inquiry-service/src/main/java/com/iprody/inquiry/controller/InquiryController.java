@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
         value = {
                 @ApiResponse(responseCode = "400", description = "Bad request"),
                 @ApiResponse(responseCode = "404", description = "Not found"),
+                @ApiResponse(responseCode = "424", description = "External service unavailable"),
                 @ApiResponse(responseCode = "500", description = "Internal server error")
         })
 @RequiredArgsConstructor
