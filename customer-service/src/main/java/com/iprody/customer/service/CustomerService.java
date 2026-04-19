@@ -28,7 +28,7 @@ public class CustomerService {
 
     @Transactional(readOnly = true)
     public Customer findById(UUID id) {
-        return customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND));
+        return customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id));
     }
 
     public ResultList<Customer> findAllByFilter(CustomerFilter filter, Pagination pagination, Sorting sorting) {

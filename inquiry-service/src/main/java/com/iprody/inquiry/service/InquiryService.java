@@ -28,7 +28,7 @@ public class InquiryService {
 
     @Transactional(readOnly = true)
     public Inquiry findById(UUID id) {
-        return inquiryRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND));
+        return inquiryRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id));
     }
 
     @Transactional
