@@ -1,0 +1,11 @@
+### get api actuator
+GET http://localhost:8080/actuator
+
+### actuator helth
+GET http://localhost:8080/actuator/health
+
+### metrics
+GET http://localhost:8080/actuator/metrics
+
+### metrics disk total
+GET http://localhost:8080/actuator/metrics/disk.total
