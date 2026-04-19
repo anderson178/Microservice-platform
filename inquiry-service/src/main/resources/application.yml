@@ -1,5 +1,13 @@
 server:
   port: 8080
+#server:
+#  port: 8443
+#  ssl:
+#    enabled: true
+#    key-store: classpath:keystore/inquiry-service-cert.p12
+#    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+#    key-store-type: PKCS12
+#    key-alias: inquiry-service-cert
 
 spring:
   jpa:
