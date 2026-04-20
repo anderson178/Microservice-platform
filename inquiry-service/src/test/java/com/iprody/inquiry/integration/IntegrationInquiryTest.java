@@ -3,9 +3,11 @@ package com.iprody.inquiry.integration;
 import com.iprody.common.ResultCode;
 import com.iprody.common.ResultList;
 import com.iprody.common.dto.SortDirectionTypeDto;
+import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquirySortFieldDto;
+import com.iprody.inquiry.kafka.CancellationStatus;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.repository.InquiryRepo;
@@ -19,6 +21,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -35,6 +38,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Testcontainers
 @Sql(scripts = {"/sql/init-schema.sql"})
 @DisplayName("Inquiry Integration Tests (HTTP → Service → Repo → DB)")
+@TestPropertySource(properties = "spring.kafka.bootstrap-servers=localhost:9092")
 public class IntegrationInquiryTest {
     @Container
     @ServiceConnection
@@ -77,6 +81,7 @@ public class IntegrationInquiryTest {
                     .getResponseBody();
 
             assertThat(responseDto).isNotNull();
+            assert responseDto != null;
             assertThat(responseDto.getId()).isNotNull();
             assertThat(responseDto.getStatus()).isEqualTo(InquiryStatus.NEW);
 
@@ -107,7 +112,6 @@ public class IntegrationInquiryTest {
                     .jsonPath("$.code").isEqualTo(ResultCode.VALIDATION_ERROR.name())
                     .jsonPath("$.message").isNotEmpty();
         }
-
 
         @Test
         @DisplayName("should return 400 when request body is empty")
@@ -147,7 +151,8 @@ public class IntegrationInquiryTest {
                             .build())
                     .exchange()
                     .expectStatus().isOk()
-                    .expectBody(new org.springframework.core.ParameterizedTypeReference<ResultList<InquiryDto>>() {})
+                    .expectBody(new org.springframework.core.ParameterizedTypeReference<ResultList<InquiryDto>>() {
+                    })
                     .returnResult()
                     .getResponseBody();
 
@@ -167,7 +172,8 @@ public class IntegrationInquiryTest {
                     .uri("/api/v1/inquires/search")
                     .exchange()
                     .expectStatus().isOk()
-                    .expectBody(new org.springframework.core.ParameterizedTypeReference<ResultList<InquiryDto>>() {})
+                    .expectBody(new org.springframework.core.ParameterizedTypeReference<ResultList<InquiryDto>>() {
+                    })
                     .returnResult()
                     .getResponseBody();
 
@@ -229,6 +235,117 @@ public class IntegrationInquiryTest {
                     .expectStatus().isBadRequest()
                     .expectBody()
                     .jsonPath("$.message").isNotEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("POST /inquires/cancel")
+    class CancelTests {
+
+        @Test
+        @DisplayName("should accept valid cancellation request and return 202")
+        void cancel_validInquiry_returns202() {
+            InquiryDataDto createDto = new InquiryDataDto();
+            createDto.setProductRefId(UUID.randomUUID());
+            createDto.setCustomerRefId(UUID.randomUUID());
+            createDto.setManagerRefId(UUID.randomUUID());
+            createDto.setSource("WEB");
+
+            InquiryDto created = webClient.post()
+                    .uri("/api/v1/inquires")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(createDto)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody(InquiryDto.class)
+                    .returnResult()
+                    .getResponseBody();
+
+            assertThat(created).isNotNull();
+            assert created != null;
+            UUID inquiryId = created.getId();
+
+            CancellationRequestDto cancelDto = new CancellationRequestDto();
+            cancelDto.setId(inquiryId);
+            cancelDto.setStatus(CancellationStatus.RECEIVED);
+            cancelDto.setReason("Customer requested cancellation");
+
+            webClient.post()
+                    .uri("/api/v1/inquires/cancel")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(cancelDto)
+                    .exchange()
+                    .expectStatus().isAccepted();
+        }
+
+        @Test
+        @DisplayName("should return 404 when inquiry not found")
+        void cancel_nonExistentInquiry_returns404() {
+            CancellationRequestDto cancelDto = new CancellationRequestDto();
+            cancelDto.setId(UUID.randomUUID());
+            cancelDto.setStatus(CancellationStatus.RECEIVED);
+            cancelDto.setReason("Test");
+
+            webClient.post()
+                    .uri("/api/v1/inquires/cancel")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(cancelDto)
+                    .exchange()
+                    .expectStatus().isNotFound()
+                    .expectBody()
+                    .jsonPath("$.code").isEqualTo(ResultCode.NOT_FOUND.name())
+                    .jsonPath("$.message").isNotEmpty();
+        }
+
+        @Test
+        @DisplayName("should return 400 when id is missing (validation)")
+        void cancel_missingId_returns400() {
+            CancellationRequestDto cancelDto = new CancellationRequestDto();
+            cancelDto.setStatus(CancellationStatus.RECEIVED);
+            cancelDto.setReason("Test");
+
+            webClient.post()
+                    .uri("/api/v1/inquires/cancel")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(cancelDto)
+                    .exchange()
+                    .expectStatus().isBadRequest()
+                    .expectBody()
+                    .jsonPath("$.code").isEqualTo(ResultCode.VALIDATION_ERROR.name());
+        }
+
+        @Test
+        @DisplayName("should accept request with null reason (optional field)")
+        void cancel_nullReason_isAccepted() {
+            InquiryDataDto createDto = new InquiryDataDto();
+            createDto.setProductRefId(UUID.randomUUID());
+            createDto.setCustomerRefId(UUID.randomUUID());
+            createDto.setManagerRefId(UUID.randomUUID());
+            createDto.setSource("WEB");
+
+            InquiryDto created = webClient.post()
+                    .uri("/api/v1/inquires")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(createDto)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody(InquiryDto.class)
+                    .returnResult()
+                    .getResponseBody();
+
+            assert created != null;
+            UUID inquiryId = created.getId();
+
+            CancellationRequestDto cancelDto = new CancellationRequestDto();
+            cancelDto.setId(inquiryId);
+            cancelDto.setStatus(CancellationStatus.RECEIVED);
+
+            webClient.post()
+                    .uri("/api/v1/inquires/cancel")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(cancelDto)
+                    .exchange()
+                    .expectStatus().isAccepted();
         }
     }
 

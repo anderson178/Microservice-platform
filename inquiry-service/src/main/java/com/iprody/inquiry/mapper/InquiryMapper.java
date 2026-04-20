@@ -5,10 +5,8 @@ import com.iprody.common.ResultList;
 import com.iprody.common.Sorting;
 import com.iprody.common.dto.SortingDto;
 import com.iprody.common.utils.EnumUtils;
-import com.iprody.inquiry.dto.InquiryDataDto;
-import com.iprody.inquiry.dto.InquiryDto;
-import com.iprody.inquiry.dto.InquiryFilterDto;
-import com.iprody.inquiry.dto.InquirySortFieldDto;
+import com.iprody.inquiry.dto.*;
+import com.iprody.inquiry.kafka.CancellationRequest;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryData;
 import com.iprody.inquiry.model.InquirySortField;
@@ -54,4 +52,8 @@ public interface InquiryMapper {
 
         return new Sorting(sortField, direction != null ? direction : Sort.Direction.DESC);
     }
+
+    CancellationRequest fromCancellationRequestDto(CancellationRequestDto dto);
+
+    InquiryUpdateData update(Inquiry inquiry);
 }

@@ -9,11 +9,13 @@ import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.model.InquiryUpdateData;
 import com.iprody.inquiry.repository.InquiryRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InquiryService {
@@ -28,7 +30,12 @@ public class InquiryService {
 
     @Transactional(readOnly = true)
     public Inquiry findById(UUID id) {
-        return inquiryRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id));
+        return inquiryRepo.findById(id).orElseThrow(() -> new AppException(ResultCode.NOT_FOUND, id));
+    }
+
+    @Transactional(readOnly = true)
+    public void checkById(UUID id) {
+        findById(id);
     }
 
     @Transactional

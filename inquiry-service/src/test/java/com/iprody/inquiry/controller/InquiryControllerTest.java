@@ -6,6 +6,7 @@ import com.iprody.inquiry.configuration.ConfigurationTest;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
+import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.service.InquiryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MediaType;
@@ -41,6 +42,10 @@ class InquiryControllerTest {
 
     @MockitoBean
     private InquiryService inquiryService;
+
+    @MockitoBean
+    private EventProcessorService eventProcessorService;
+
 
     @Nested
     @DisplayName("POST /inquires")
