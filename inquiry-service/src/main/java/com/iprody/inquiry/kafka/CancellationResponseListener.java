@@ -2,7 +2,6 @@ package com.iprody.inquiry.kafka;
 
 import com.iprody.inquiry.service.EventProcessorService;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.Set;
 

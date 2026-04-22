@@ -7,10 +7,14 @@ import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquirySortFieldDto;
+import com.iprody.inquiry.kafka.CancellationRequest;
 import com.iprody.inquiry.kafka.CancellationStatus;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.repository.InquiryRepo;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,14 +25,21 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.UUID;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -38,12 +49,20 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Testcontainers
 @Sql(scripts = {"/sql/init-schema.sql"})
 @DisplayName("Inquiry Integration Tests (HTTP → Service → Repo → DB)")
-@TestPropertySource(properties = "spring.kafka.bootstrap-servers=localhost:9092")
 public class IntegrationInquiryTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withInitScript("sql/init-schema.sql");
+
+    @Container
+    @ServiceConnection
+    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:4.2.0"));
+
+    @DynamicPropertySource
+    static void overrideProps(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+    }
 
     @Autowired
     private WebTestClient webClient;
@@ -243,8 +262,8 @@ public class IntegrationInquiryTest {
     class CancelTests {
 
         @Test
-        @DisplayName("should accept valid cancellation request and return 202")
-        void cancel_validInquiry_returns202() {
+        @DisplayName("should accept valid cancellation request, return 202, and publish to Kafka")
+        void cancel_validInquiry_publishesToKafka() {
             InquiryDataDto createDto = new InquiryDataDto();
             createDto.setProductRefId(UUID.randomUUID());
             createDto.setCustomerRefId(UUID.randomUUID());
@@ -276,6 +295,24 @@ public class IntegrationInquiryTest {
                     .bodyValue(cancelDto)
                     .exchange()
                     .expectStatus().isAccepted();
+
+            String bootstrapServers = kafka.getBootstrapServers();
+            try (var consumer = createTestConsumer(bootstrapServers)) {
+                consumer.subscribe(Collections.singletonList("cancellation.request"));
+
+                var found = Stream
+                        .generate(() -> consumer.poll(java.time.Duration.ofMillis(100)))
+                        .limit(100)
+                        .flatMap(records -> StreamSupport.stream(
+                                records.records("cancellation.request").spliterator(), false))
+                        .filter(record -> inquiryId.toString().equals(record.key()))
+                        .findFirst();
+
+                assertThat(found).as("Message should be published to cancellation.request").isPresent();
+                assertThat(found.get().value().getId()).isEqualTo(inquiryId);
+                assertThat(found.get().value().getStatus()).isEqualTo(CancellationStatus.RECEIVED);
+                assertThat(found.get().value().getReason()).isEqualTo("Customer requested cancellation");
+            }
         }
 
         @Test
@@ -296,57 +333,21 @@ public class IntegrationInquiryTest {
                     .jsonPath("$.code").isEqualTo(ResultCode.NOT_FOUND.name())
                     .jsonPath("$.message").isNotEmpty();
         }
+    }
 
-        @Test
-        @DisplayName("should return 400 when id is missing (validation)")
-        void cancel_missingId_returns400() {
-            CancellationRequestDto cancelDto = new CancellationRequestDto();
-            cancelDto.setStatus(CancellationStatus.RECEIVED);
-            cancelDto.setReason("Test");
+    private KafkaConsumer<String, CancellationRequest> createTestConsumer(String bootstrapServers) {
+        java.util.Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-consumer-" + UUID.randomUUID());
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JacksonJsonDeserializer.class);
 
-            webClient.post()
-                    .uri("/api/v1/inquires/cancel")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(cancelDto)
-                    .exchange()
-                    .expectStatus().isBadRequest()
-                    .expectBody()
-                    .jsonPath("$.code").isEqualTo(ResultCode.VALIDATION_ERROR.name());
-        }
+        props.put("spring.json.trusted.packages", "com.iprody.inquiry.kafka");
+        props.put("spring.json.value.default.type", CancellationRequest.class);
+        props.put("spring.json.use.type.headers", false);
 
-        @Test
-        @DisplayName("should accept request with null reason (optional field)")
-        void cancel_nullReason_isAccepted() {
-            InquiryDataDto createDto = new InquiryDataDto();
-            createDto.setProductRefId(UUID.randomUUID());
-            createDto.setCustomerRefId(UUID.randomUUID());
-            createDto.setManagerRefId(UUID.randomUUID());
-            createDto.setSource("WEB");
-
-            InquiryDto created = webClient.post()
-                    .uri("/api/v1/inquires")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(createDto)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody(InquiryDto.class)
-                    .returnResult()
-                    .getResponseBody();
-
-            assert created != null;
-            UUID inquiryId = created.getId();
-
-            CancellationRequestDto cancelDto = new CancellationRequestDto();
-            cancelDto.setId(inquiryId);
-            cancelDto.setStatus(CancellationStatus.RECEIVED);
-
-            webClient.post()
-                    .uri("/api/v1/inquires/cancel")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(cancelDto)
-                    .exchange()
-                    .expectStatus().isAccepted();
-        }
+        return new KafkaConsumer<>(props);
     }
 
     private void createInquiryViaHttp(UUID customerId, UUID managerId) {

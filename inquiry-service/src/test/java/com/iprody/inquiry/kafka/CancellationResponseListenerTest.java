@@ -1,6 +1,7 @@
 package com.iprody.inquiry.kafka;
 
 import com.iprody.inquiry.service.EventProcessorService;
+import jakarta.validation.Validator;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.record.TimestampType;
@@ -26,11 +27,14 @@ class CancellationResponseListenerTest {
     @Mock
     private Acknowledgment acknowledgment;
 
+    @Mock
+    private Validator validator;
+
     private CancellationResponseListener listener;
 
     @BeforeEach
     void setUp() {
-        listener = new CancellationResponseListener(eventProcessorService);
+        listener = new CancellationResponseListener(eventProcessorService, validator);
     }
 
     @Test
