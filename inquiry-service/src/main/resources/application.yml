@@ -29,7 +29,6 @@ spring:
       auto-offset-reset: earliest
       enable-auto-commit: false
       max-poll-records: 500
-      # Остальные свойства через properties
       properties:
         spring.json.trusted.packages: "*"
         request.timeout.ms: 60_000
