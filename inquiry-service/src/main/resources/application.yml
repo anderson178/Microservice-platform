@@ -23,3 +23,25 @@ spring:
     change-log: db/changelog-cumulative.yaml
     default-schema: inquiry
     contexts: development
+
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-records: 500
+      properties:
+        spring.json.trusted.packages: "*"
+        request.timeout.ms: 60_000
+        session.timeout.ms: 45_000
+        heartbeat.interval.ms: 3_000
+        max.poll.interval.ms: 300_000
+        fetch.max.wait.ms: 500
+    producer:
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+#logging:
+#  level:
+#    org.apache.kafka: DEBUG
+#    org.springframework.kafka: DEBUG

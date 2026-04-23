@@ -2,9 +2,11 @@ package com.iprody.inquiry.controller;
 
 import com.iprody.common.CommonMapper;
 import com.iprody.common.ResultList;
+import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquiryRecordRequestDto;
+import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.service.InquiryService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "API for inquires")
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/v1/inquires", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InquiryController {
     private final InquiryService inquiryService;
+    private final EventProcessorService eventProcessorService;
 
     @PostMapping
     public InquiryDto save(@Valid @RequestBody InquiryDataDto dto) {
@@ -47,5 +51,12 @@ public class InquiryController {
                         InquiryMapper.INSTANCE.toSorting(inquiryRecordRequestDto.getSorting())
                 )
         );
+    }
+
+    @PostMapping("/cancel")
+    public ResponseEntity<Void> cancelInquiry(@Valid @RequestBody CancellationRequestDto dto) {
+        eventProcessorService.processCancellationRequest(InquiryMapper.INSTANCE.fromCancellationRequestDto(dto));
+
+        return ResponseEntity.accepted().build();
     }
 }

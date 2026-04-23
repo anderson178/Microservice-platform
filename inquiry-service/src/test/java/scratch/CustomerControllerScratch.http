@@ -1,5 +1,5 @@
 ### getById
-GET http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+GET http://localhost:8080/api/v1/inquires/98908056-69fd-4733-8824-b91e39c37d19
 
 ### save
 POST http://localhost:8080/api/v1/inquires
@@ -13,7 +13,7 @@ Content-Type: application/json
 }
 
 ### update
-PUT http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+PUT http://localhost:8080/api/v1/inquires/98908056-69fd-4733-8824-b91e39c37d19
 Content-Type: application/json
 
 {
@@ -28,9 +28,19 @@ Content-Type: application/json
 }
 
 ### search
-GET http://localhost:8080/api/v1/customers/search
+GET http://localhost:8080/api/v1/inquires/search
     ?pagination.offset=0
     &pagination.limit=10
     &filter.fullName=DenisM
     &sorting.sortField=FULL_NAME
     &sorting.sortDirection=ASC
+
+### canceled
+POST http://localhost:8080/api/v1/inquires/cancel
+Content-Type: application/json
+
+{
+  "id": "f55e59ca-1d66-4259-b082-c4784f160b9f",
+  "status":"SUCCESS",
+  "reason":"Test cancellation222"
+}
