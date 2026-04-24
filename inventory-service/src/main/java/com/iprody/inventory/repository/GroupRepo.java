@@ -4,6 +4,7 @@ import com.iprody.inventory.model.Group;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,4 +27,9 @@ public interface GroupRepo extends JpaRepository<Group, UUID> {
             @Param("isAvailFreePlaces") Boolean isAvailFreePlaces,
             Pageable pageable
     );
+
+    @Modifying
+    @Query("update Group g set g.currentCount = g.currentCount - 1 where g.id = :id and g.currentCount > 0")
+    int decrementCountById(@Param("id") UUID id);
+
 }

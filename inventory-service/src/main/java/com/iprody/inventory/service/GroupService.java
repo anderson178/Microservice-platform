@@ -23,7 +23,7 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Group findById(UUID id) {
-        return groupRepo.findById(id).orElseThrow(() -> new AppException(ResultCode.NOT_FOUND));
+        return groupRepo.findById(id).orElseThrow(() -> new AppException(ResultCode.NOT_FOUND, id));
     }
 
     @Transactional
@@ -48,5 +48,16 @@ public class GroupService {
                 filter.getIsAvailFreePlaces(),
                 PageUtils.of(pagination))
         );
+    }
+
+    @Transactional(readOnly = true)
+    public void checkById(UUID id) {
+        findById(id);
+    }
+
+    @Transactional
+    public boolean cancellingReservation(UUID id) {
+        int updatedRows = groupRepo.decrementCountById(id);
+        return updatedRows > 0;
     }
 }
