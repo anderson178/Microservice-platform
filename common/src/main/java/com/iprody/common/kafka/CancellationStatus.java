@@ -1,4 +1,4 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.common.kafka;
 
 public enum CancellationStatus {
     RECEIVED,

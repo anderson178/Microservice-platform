@@ -1,4 +1,4 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.common.kafka;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CancellationRequest {
+@AllArgsConstructor
+public class CancellationResponse {
     private UUID id;
     private CancellationStatus status;
     private String reason;

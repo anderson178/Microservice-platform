@@ -1,6 +1,6 @@
 package com.iprody.inquiry.kafka.config;
 
-import com.iprody.inquiry.kafka.CancellationResponse;
+import com.iprody.common.kafka.CancellationResponse;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;

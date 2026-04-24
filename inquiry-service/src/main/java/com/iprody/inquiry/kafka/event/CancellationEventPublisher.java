@@ -1,5 +1,6 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.inquiry.kafka.event;
 
+import com.iprody.common.kafka.CancellationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;

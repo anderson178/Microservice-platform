@@ -1,9 +1,9 @@
 package com.iprody.inquiry.service;
 
-import com.iprody.inquiry.kafka.CancellationEventPublisher;
-import com.iprody.inquiry.kafka.CancellationRequest;
-import com.iprody.inquiry.kafka.CancellationResponse;
-import com.iprody.inquiry.kafka.CancellationStatus;
+import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
+import com.iprody.common.kafka.CancellationRequest;
+import com.iprody.common.kafka.CancellationResponse;
+import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;

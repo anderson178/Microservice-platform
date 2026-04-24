@@ -1,13 +1,16 @@
-package com.iprody.inquiry.dto;
+package com.iprody.common.kafka;
 
-import com.iprody.common.kafka.CancellationStatus;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Data
-public class CancellationRequestDto {
+@AllArgsConstructor
+@NoArgsConstructor
+public class CancellationRequest {
     @NotNull
     private UUID id;
     @NotNull

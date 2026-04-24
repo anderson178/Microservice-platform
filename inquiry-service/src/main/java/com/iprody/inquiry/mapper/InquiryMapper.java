@@ -6,7 +6,7 @@ import com.iprody.common.Sorting;
 import com.iprody.common.dto.SortingDto;
 import com.iprody.common.utils.EnumUtils;
 import com.iprody.inquiry.dto.*;
-import com.iprody.inquiry.kafka.CancellationRequest;
+import com.iprody.common.kafka.CancellationRequest;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryData;
 import com.iprody.inquiry.model.InquirySortField;

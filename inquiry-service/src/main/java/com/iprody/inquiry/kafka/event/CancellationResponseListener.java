@@ -1,5 +1,6 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.inquiry.kafka.event;
 
+import com.iprody.common.kafka.CancellationResponse;
 import com.iprody.inquiry.service.EventProcessorService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;

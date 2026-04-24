@@ -1,5 +1,8 @@
 package com.iprody.inquiry.kafka;
 
+import com.iprody.common.kafka.CancellationResponse;
+import com.iprody.common.kafka.CancellationStatus;
+import com.iprody.inquiry.kafka.event.CancellationResponseListener;
 import com.iprody.inquiry.service.EventProcessorService;
 import jakarta.validation.Validator;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

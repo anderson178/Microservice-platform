@@ -1,5 +1,7 @@
 package com.iprody.inquiry.kafka;
 
+import com.iprody.common.kafka.CancellationRequest;
+import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
