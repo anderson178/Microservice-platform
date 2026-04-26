@@ -1,0 +1,10 @@
+app:
+  outbox:
+    batch-size: 2
+
+spring:
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      group-id: inventory-cancellation-group

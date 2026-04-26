@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -29,7 +30,8 @@ public interface GroupRepo extends JpaRepository<Group, UUID> {
     );
 
     @Modifying
-    @Query("update Group g set g.currentCount = g.currentCount - 1 where g.id = :id and g.currentCount > 0")
-    int decrementCountById(@Param("id") UUID id);
+    @Query("update Group g set g.currentCount = g.currentCount - 1 where g.groupRefId = :groupRefId and g.currentCount > 0")
+    int decrementCountByGroupRefIdId(@Param("groupRefId") UUID groupRefId);
 
+    Optional<Group> findByGroupRefId(UUID groupRefId);
 }

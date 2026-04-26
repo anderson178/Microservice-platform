@@ -33,10 +33,13 @@ public class OutboxEventService {
                     .build());
             log.debug("Outbox event saved: type={}, aggregateId={}, eventType={}",
                     aggregateType, aggregateId, eventType);
-
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize outbox event: {}", event, e);
             throw new RuntimeException("Failed to serialize outbox event", e);
         }
+    }
+
+    public boolean existsByAggregateIdAndType(UUID aggregateId, OutboxEventType eventType) {
+        return outboxRepo.existsByAggregateIdAndEventType(aggregateId, eventType);
     }
 }

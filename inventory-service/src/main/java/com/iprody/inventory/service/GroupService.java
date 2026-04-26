@@ -22,8 +22,8 @@ public class GroupService {
     private final GroupRepo groupRepo;
 
     @Transactional(readOnly = true)
-    public Group findById(UUID id) {
-        return groupRepo.findById(id).orElseThrow(() -> new AppException(ResultCode.NOT_FOUND, id));
+    public Group findByGroupRefId(UUID id) {
+        return groupRepo.findByGroupRefId(id).orElseThrow(() -> new AppException(ResultCode.NOT_FOUND, id));
     }
 
     @Transactional
@@ -35,7 +35,7 @@ public class GroupService {
     public Group update(UUID id, GroupUpdateData data) {
         return groupRepo.save(
                 GroupMapper.INSTANCE.update(
-                        findById(id),
+                        findByGroupRefId(id),
                         data
                 )
         );
@@ -51,13 +51,13 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public void checkById(UUID id) {
-        findById(id);
+    public void checkFindByGroupRefId(UUID id) {
+        findByGroupRefId(id);
     }
 
     @Transactional
-    public boolean cancellingReservation(UUID id) {
-        int updatedRows = groupRepo.decrementCountById(id);
+    public boolean cancellingReservation(UUID groupRefId) {
+        int updatedRows = groupRepo.decrementCountByGroupRefIdId(groupRefId);
         return updatedRows > 0;
     }
 }

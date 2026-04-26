@@ -1,7 +1,7 @@
 app:
   outbox:
     batch-size: 50
-    poll-interval-ms: 20_000
+    poll-interval-ms: 60_000
 
 server:
   port: 8080

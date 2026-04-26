@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.2 - add index for group_ref_id
+      author: mironenko
+      changes:
+        - createIndex:
+            indexName: idx_group_group_ref_id
+            tableName: group
+            columns:
+              - column:
+                  name: group_ref_id
+      rollback:
+        - dropIndex:
+            indexName: idx_group_group_ref_id
+            tableName: group

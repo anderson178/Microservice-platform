@@ -36,23 +36,23 @@ class GroupServiceTest {
     private GroupService groupService;
 
     @Test
-    void findById_Success() {
+    void findByGroupRefId_Success() {
         UUID id = UUID.randomUUID();
         Group group = new Group();
-        when(groupRepo.findById(id)).thenReturn(Optional.of(group));
+        when(groupRepo.findByGroupRefId(id)).thenReturn(Optional.of(group));
 
-        Group result = groupService.findById(id);
+        Group result = groupService.findByGroupRefId(id);
 
         assertNotNull(result);
-        verify(groupRepo).findById(id);
+        verify(groupRepo).findByGroupRefId(id);
     }
 
     @Test
-    void findById_NotFound_ThrowsException() {
+    void findByGroupRefId_NotFound_ThrowsException() {
         UUID id = UUID.randomUUID();
-        when(groupRepo.findById(id)).thenReturn(Optional.empty());
+        when(groupRepo.findByGroupRefId(id)).thenReturn(Optional.empty());
 
-        AppException exception = assertThrows(AppException.class, () -> groupService.findById(id));
+        AppException exception = assertThrows(AppException.class, () -> groupService.findByGroupRefId(id));
         assertEquals(ResultCode.NOT_FOUND, exception.getCode());
     }
 
@@ -74,13 +74,13 @@ class GroupServiceTest {
         GroupUpdateData updateData = new GroupUpdateData();
         Group existingGroup = new Group();
 
-        when(groupRepo.findById(id)).thenReturn(Optional.of(existingGroup));
+        when(groupRepo.findByGroupRefId(id)).thenReturn(Optional.of(existingGroup));
         when(groupRepo.save(any(Group.class))).thenAnswer(i -> i.getArguments()[0]);
 
         Group result = groupService.update(id, updateData);
 
         assertNotNull(result);
-        verify(groupRepo).findById(id);
+        verify(groupRepo).findByGroupRefId(id);
         verify(groupRepo).save(any(Group.class));
     }
 

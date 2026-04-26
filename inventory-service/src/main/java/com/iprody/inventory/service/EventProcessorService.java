@@ -21,12 +21,16 @@ public class EventProcessorService {
 
     @Transactional
     public void processCancellationRequest(UUID requestId, CancellationRequest request) {
-        groupService.checkById(request.getId());
+        groupService.checkFindByGroupRefId(request.getId());
         if (CancellationStatus.RECEIVED.equals(request.getStatus())) {
-            CancellationStatus status = groupService.cancellingReservation(request.getId())
-                    ? CancellationStatus.SUCCESS
-                    : CancellationStatus.FAILED;
-            saveEvent(requestId, status, request);
+            if (!outboxEventService.existsByAggregateIdAndType(requestId, OutboxEventType.CANCELLATION_REQUESTED)) {
+                CancellationStatus status = groupService.cancellingReservation(request.getId())
+                        ? CancellationStatus.SUCCESS
+                        : CancellationStatus.FAILED;
+                saveEvent(requestId, status, request);
+            } else {
+                log.info("Cancellation request with aggregationId={} already exists", requestId);
+            }
         } else {
             log.info("Cancellation request is not received status");
         }

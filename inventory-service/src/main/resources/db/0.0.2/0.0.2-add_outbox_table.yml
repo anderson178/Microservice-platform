@@ -47,6 +47,12 @@ databaseChangeLog:
                   name: processed_at
                   type: TIMESTAMP
                   defaultValueComputed: CURRENT_TIMESTAMP
+              - createIndex:
+                  indexName: idx_outbox_aggregate_id
+                  tableName: outbox_event
+                  columns:
+                    - column:
+                        name: aggregate_id
       rollback:
         - dropTable:
             tableName: outbox_event

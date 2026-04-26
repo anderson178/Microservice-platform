@@ -1,8 +1,8 @@
 package com.iprody.inventory.kafka.config;
 
-import com.iprody.common.kafka.CancellationResponse;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +20,8 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Bean("cancellationProducerFactory")
-    public ProducerFactory<String, CancellationResponse> cancellationProducerFactory() {
+    @Bean("outboxProducerFactory") // переименуем для универсальности
+    public ProducerFactory<String, Object> outboxProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -30,8 +30,9 @@ public class KafkaProducerConfig {
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
-    @Bean("cancellationKafkaTemplate")
-    public KafkaTemplate<String, CancellationResponse> cancellationKafkaTemplate(ProducerFactory<String, CancellationResponse> producerFactory) {
+    @Bean("outboxKafkaTemplate")
+    public KafkaTemplate<String, Object> outboxKafkaTemplate(
+            @Qualifier("outboxProducerFactory") ProducerFactory<String, Object> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }

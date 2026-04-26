@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iprody.inventory.model.OutboxEvent;
 import com.iprody.inventory.model.OutboxEventStatus;
-import com.iprody.inventory.model.OutboxEventType;
 import com.iprody.inventory.repository.OutboxEventRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +46,7 @@ public class OutboxPublisher {
     private void publishEvent(OutboxEvent event) {
         try {
             kafkaTemplate.send(
-                            resolveTopic(event.getEventType()),
+                            event.getEventType().getPublishTopic(),
                             event.getAggregateId().toString(),
                             objectMapper.readValue(event.getEvent(), Object.class))
                     .whenComplete((result, ex) -> {
@@ -64,12 +63,6 @@ public class OutboxPublisher {
             markAsFailed(event);
             log.error("JSON mapping failed for outbox event {}: {}", event.getId(), e.getMessage());
         }
-    }
-
-    private String resolveTopic(OutboxEventType eventType) {
-        return switch (eventType) {
-            case CANCELLATION_REQUESTED -> CancellationRequestListener.TOPIC;
-        };
     }
 
     private void markAsPublished(OutboxEvent event) {

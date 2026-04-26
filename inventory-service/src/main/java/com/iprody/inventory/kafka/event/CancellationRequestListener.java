@@ -28,6 +28,8 @@ public class CancellationRequestListener {
             containerFactory = "cancellationListenerContainerFactory"
     )
     public void consume(ConsumerRecord<String, CancellationRequest> record, Acknowledgment ack) {
+        //record.key - inquiryId
+
         log.info("Received cancellation request with key={}", record.key());
         log.info("Received cancellation request from topic: {}, partition: {}, offset: {}",
                 record.topic(), record.partition(), record.offset());
