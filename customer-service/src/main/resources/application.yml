@@ -23,3 +23,9 @@ spring:
     change-log: db/changelog-cumulative.yaml
     default-schema: customer
     contexts: development
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics"
