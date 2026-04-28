@@ -1,4 +1,4 @@
-package com.iprody.payment.model;
+package com.iprody.common.struct;
 
 public enum PaymentStatus {
     /**

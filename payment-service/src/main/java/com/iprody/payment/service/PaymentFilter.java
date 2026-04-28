@@ -1,7 +1,7 @@
 package com.iprody.payment.service;
 
 import com.iprody.common.DateRange;
-import com.iprody.payment.model.PaymentStatus;
+import com.iprody.common.struct.PaymentStatus;
 import lombok.Data;
 
 import java.util.UUID;

@@ -4,7 +4,7 @@ import com.iprody.common.PageUtils;
 import com.iprody.common.Pagination;
 import com.iprody.common.ResultList;
 import com.iprody.common.Sorting;
-import com.iprody.payment.model.Payment;
+import com.iprody.payment.model.payment.Payment;
 import com.iprody.payment.repository.PaymentRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,5 +35,9 @@ public class PaymentService {
                 filter.getStatus(),
                 PageUtils.of(pagination, sorting))
         );
+    }
+
+    public boolean existsByInquiryRefId(UUID inquiryRefId) {
+       return paymentRepo.existsByInquiryRefId(inquiryRefId);
     }
 }

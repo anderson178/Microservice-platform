@@ -2,10 +2,9 @@ package com.iprody.payment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-/**
- * Start customer app class.
- */
+@EnableScheduling
 @SpringBootApplication
 public class PaymentApp {
 
@@ -14,6 +13,5 @@ public class PaymentApp {
 
     public static void main(final String[] args) {
         SpringApplication.run(PaymentApp.class, args);
-        System.out.println("Payment service started! ");
     }
 }

@@ -1,4 +1,4 @@
-package com.iprody.payment.model;
+package com.iprody.payment.model.payment;
 
 import com.iprody.common.SortableField;
 
