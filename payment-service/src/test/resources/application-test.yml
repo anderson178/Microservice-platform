@@ -11,3 +11,13 @@ spring:
     properties:
       hibernate:
         default_schema: payment
+
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      group-id: payment-inquiry-group
+
+app:
+  outbox:
+    batch-size: 2

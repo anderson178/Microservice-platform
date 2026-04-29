@@ -1,5 +1,6 @@
-package com.iprody.payment.model;
+package com.iprody.payment.model.payment;
 
+import com.iprody.common.struct.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "PAYMENT")
 public class Payment {
-    private static final int AMOUNT_PRECISION = 5;
+    private static final int AMOUNT_PRECISION = 19;
     private static final int AMOUNT_SCALE = 2;
 
     @Id
@@ -50,6 +51,6 @@ public class Payment {
     @Column(name = "CREATED_AT", nullable = false)
     private Timestamp createdAt;
 
-    @Column(name = "UPDATED_AT", nullable = false)
+    @Column(name = "UPDATED_AT")
     private Timestamp updatedAt;
 }

@@ -1,7 +1,7 @@
 package com.iprody.payment;
 
-import com.iprody.payment.model.Payment;
-import com.iprody.payment.model.PaymentStatus;
+import com.iprody.payment.model.payment.Payment;
+import com.iprody.common.struct.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

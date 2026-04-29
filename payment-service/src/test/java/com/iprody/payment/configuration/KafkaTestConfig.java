@@ -1,0 +1,42 @@
+package com.iprody.payment.configuration;
+
+import com.iprody.payment.model.outbox.OutboxEventType;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistrar;
+import org.testcontainers.kafka.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
+
+@TestConfiguration(proxyBeanMethods = false)
+public class KafkaTestConfig {
+    static final KafkaContainer KAFKA = new KafkaContainer(DockerImageName.parse("apache/kafka:4.2.0"));
+
+    static {
+        KAFKA.start();
+    }
+
+    @Bean
+    public DynamicPropertyRegistrar kafkaProperties() {
+        return registry -> {
+            registry.add("spring.kafka.bootstrap-servers", KAFKA::getBootstrapServers);
+        };
+    }
+
+    @Bean
+    @ServiceConnection
+    public KafkaContainer kafkaContainer() {
+        return KAFKA;
+    }
+
+    @Bean
+    public NewTopic cancellationRequestTopic() {
+        return new NewTopic(OutboxEventType.PAYMENT_REQUESTED.getListenTopic(), 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic cancellationResponseTopic() {
+        return new NewTopic(OutboxEventType.PAYMENT_REQUESTED.getPublishTopic(), 1, (short) 1);
+    }
+}
