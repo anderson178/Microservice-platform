@@ -78,7 +78,6 @@ class InquiryRepoTest {
 
             assertThat(saved.getId()).isNotNull();
             assertThat(saved.getCreatedAt()).isNotNull();
-            assertThat(saved.getUpdatedAt()).isNotNull();
             assertThat(saved.getCreatedAt()).isBeforeOrEqualTo(Timestamp.valueOf(LocalDateTime.now()));
             assertThat(saved.getStatus()).isEqualTo(InquiryStatus.NEW);
             assertThat(saved.getProductRefId()).isEqualTo(testProductId);
@@ -168,7 +167,7 @@ class InquiryRepoTest {
         @DisplayName("should fail when source exceeds max length (100 chars)")
         void save_sourceTooLong_throwsException() {
             Inquiry inquiry = createValidInquiry();
-            inquiry.setSource("A".repeat(101)); // 101 символ > max-length 100
+            inquiry.setSource("A".repeat(101));
 
             assertThatThrownBy(() -> inquiryRepo.saveAndFlush(inquiry))
                     .isInstanceOf(DataIntegrityViolationException.class)

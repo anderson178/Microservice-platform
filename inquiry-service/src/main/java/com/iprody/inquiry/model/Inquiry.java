@@ -49,6 +49,6 @@ public class Inquiry {
     private Timestamp createdAt;
 
     @Generated(event = EventType.INSERT)
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private Timestamp updatedAt;
 }

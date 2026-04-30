@@ -27,6 +27,7 @@ public interface InquiryMapper {
 
     @Mapping(target = "status", source = "data.status")
     @Mapping(target = "managerRefId", source = "data.managerRefId")
+    @Mapping(target = "note", source = "data.note")
     Inquiry update(Inquiry inquiry, InquiryUpdateData data);
 
     InquiryDto toDto(Inquiry inquiry);

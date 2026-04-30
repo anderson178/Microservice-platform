@@ -8,4 +8,5 @@ import java.util.UUID;
 public class InquiryUpdateData {
     private InquiryStatus status;
     private UUID managerRefId;
+    private String note;
 }
