@@ -32,11 +32,11 @@ public class KafkaTestConfig {
 
     @Bean
     public NewTopic cancellationRequestTopic() {
-        return new NewTopic(OutboxEventType.PAYMENT_REQUESTED.getListenTopic(), 1, (short) 1);
+        return new NewTopic(OutboxEventType.PAYMENT_REQUEST.getTopic(), 1, (short) 1);
     }
 
     @Bean
     public NewTopic cancellationResponseTopic() {
-        return new NewTopic(OutboxEventType.PAYMENT_REQUESTED.getPublishTopic(), 1, (short) 1);
+        return new NewTopic(OutboxEventType.PAYMENT_RESPONSE.getTopic(), 1, (short) 1);
     }
 }

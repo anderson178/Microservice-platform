@@ -2,6 +2,11 @@ app:
   outbox:
     batch-size: 50
     poll-interval-ms: 60_000
+  payment-provider:
+    url: "http://localhost:9999/charges"
+    credentials:
+      user: "paymentAgentIprody"
+      pwd: "iprodyTestPassword0123"
 
 server:
   port: 8080

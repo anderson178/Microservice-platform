@@ -4,6 +4,7 @@ import com.iprody.common.PageUtils;
 import com.iprody.common.Pagination;
 import com.iprody.common.ResultList;
 import com.iprody.common.Sorting;
+import com.iprody.common.struct.PaymentStatus;
 import com.iprody.payment.model.payment.Payment;
 import com.iprody.payment.repository.PaymentRepo;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,23 @@ public class PaymentService {
     }
 
     public boolean existsByInquiryRefId(UUID inquiryRefId) {
-       return paymentRepo.existsByInquiryRefId(inquiryRefId);
+        return paymentRepo.existsByInquiryRefId(inquiryRefId);
+    }
+
+    public boolean isAlreadyProcessedByBank(UUID inquiryRefId) {
+        return paymentRepo.findByInquiryRefId(inquiryRefId)
+                .map(p -> p.getPaymentStatus() != PaymentStatus.RECEIVED
+                        && p.getPaymentStatus() != PaymentStatus.PENDING)
+                .orElse(false);
+    }
+
+    @Transactional
+    public void updateByInquiryRefId(UUID inquiryRefId, PaymentStatus status, UUID transactionRefId) {
+        paymentRepo.updateByInquiryRefId(inquiryRefId, status, transactionRefId);
+    }
+
+    @Transactional
+    public void updateByInquiryRefId(UUID inquiryRefId, PaymentStatus status) {
+        paymentRepo.updateByInquiryRefId(inquiryRefId, status);
     }
 }
