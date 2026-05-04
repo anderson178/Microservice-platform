@@ -1,8 +1,6 @@
 package com.iprody.payment.kafka.event;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.iprody.common.kafka.KafkaEventRout;
-import com.iprody.common.struct.PaymentStatus;
 import com.iprody.common.utils.JsonStructUtils;
 import com.iprody.payment.kafka.dto.BankRequest;
 import com.iprody.payment.kafka.dto.BankResponse;
@@ -16,15 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.BackOff;
-import org.springframework.kafka.annotation.DltHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
 import java.util.UUID;
@@ -61,57 +55,62 @@ public class BankingRequestListener {
         log.debug("Received banking request from topic: {}, partition: {}, offset: {}",
                 record.topic(), record.partition(), record.offset());
 
-        BankRequest event = record.value();
         if (!validator.validate(record)) {
             ack.acknowledge();
             return;
         }
 
-        log.info("Processing http request to bankingService");
+        BankRequest event = record.value();
+        UUID inquiryRefId = event.getInquiryRefId();
 
+        if (paymentService.isAlreadyProcessedByBank(inquiryRefId)) {
+            log.info("Payment with inquiryRefId={} already sent. Skipping.", inquiryRefId);
+            ack.acknowledge();
+            return;
+        }
+
+        processBankInteraction(event, ack);
+    }
+
+    private void processBankInteraction(BankRequest event, Acknowledgment ack) {
         try {
-            UUID inquiryRefId = event.getInquiryRefId();
-            if (paymentService.isAlreadyProcessedByBank(inquiryRefId)) {
-                log.info("Payment with inquiryRefId={} was already sent to bank. Skipping HTTP call.", inquiryRefId);
-                ack.acknowledge();
-                return;
-            }
-
             ResponseEntity<String> response = httpClientService.sendBankRequest(event);
-            if (response == null || !response.getStatusCode().is2xxSuccessful()) {
-                throw new RuntimeException("Bank API unavailable, triggering retry...");
-            }
+            validateHttpResponse(response);
 
-            if (StringUtils.isNotBlank(response.getBody())) {
-                BankResponse bankResponse = JsonStructUtils.fromJsonSafe(BankResponse.class, response.getBody());
-                if (bankResponse != null) {
-                    if (BankResponse.Status.PROCESSING.equals(bankResponse.getStatus())) {
-                        eventProcessorService.responseBankInitialStageProcessing(event.getInquiryRefId(), bankResponse);
-                    } else {
-                        eventProcessorService.responseBankProcessing(inquiryRefId, bankResponse);
-                    }
+            BankResponse bankResponse = parseBankResponse(response.getBody());
+            handleBankResponseStatus(event.getInquiryRefId(), bankResponse);
 
-                    ack.acknowledge();
-                } else {
-                    log.error("Failed to parse bank response body");
-                    throw new IllegalArgumentException("Invalid JSON format from bank");
-                }
-            }
+            ack.acknowledge();
         } catch (Exception e) {
-            log.error("Error calling banking service", e);
+            log.error("Error calling banking service for inquiryRefId={}", event.getInquiryRefId(), e);
             throw e;
         }
     }
 
-    // A handler for "suicide bombers" who failed the retreats
-    // ack.acknowledge() - automatically
-    @DltHandler
-    public void handleDlt(BankRequest event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-        try {
-            log.error("Event {} failed all retries in topic {}", event.getInquiryRefId(), topic);
-            eventProcessorService.bankErrorHandle(event.getInquiryRefId(), PaymentStatus.REJECTED, event);
-        } catch (Exception e) {
-            log.error("CRITICAL: Failed to execute DLT handler with key{} and topic {}", event.getInquiryRefId(), topic, e);
+    private void validateHttpResponse(ResponseEntity<String> response) {
+        if (response == null || !response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Bank API unavailable, triggering retry...");
+        }
+    }
+
+    private BankResponse parseBankResponse(String body) {
+        if (StringUtils.isBlank(body)) {
+            throw new IllegalArgumentException("Empty response body from bank");
+        }
+
+        BankResponse bankResponse = JsonStructUtils.fromJsonSafe(BankResponse.class, body);
+        if (bankResponse == null) {
+            log.error("Failed to parse bank response body: {}", body);
+            throw new IllegalArgumentException("Invalid JSON format from bank");
+        }
+        return bankResponse;
+    }
+
+    private void handleBankResponseStatus(UUID inquiryRefId, BankResponse bankResponse) {
+        if (BankResponse.Status.PROCESSING.equals(bankResponse.getStatus())) {
+            eventProcessorService.responseBankInitialStageProcessing(inquiryRefId, bankResponse);
+        } else {
+            eventProcessorService.responseBankProcessing(inquiryRefId, bankResponse);
         }
     }
 }

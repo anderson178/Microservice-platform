@@ -40,8 +40,23 @@ public class EventProcessorService {
 
         event.setStatus(paymentStatus);
         saveOutboxEvent(event, OutboxEventType.PAYMENT_RESPONSE);
-        saveOutboxEvent(event, OutboxEventType.BANKING_REQUEST);
+        saveOutboxEvent(
+                new BankRequest(payment.getId(),
+                        inquiryRefId,
+                        event.getAmount(),
+                        event.getCurrency()),
+                OutboxEventType.BANKING_REQUEST);
     }
+
+    private void saveOutboxEvent(BankRequest request, OutboxEventType eventType) {
+        outboxEventService.saveEvent(
+                OutboxAggregateType.INQUIRY,
+                request.getInquiryRefId(),
+                eventType,
+                request
+        );
+    }
+
 
     private void saveOutboxEvent(PaymentRequest request, OutboxEventType eventType) {
         outboxEventService.saveEvent(
@@ -87,11 +102,6 @@ public class EventProcessorService {
     @Transactional
     public void bankErrorHandle(UUID inquiryRefId, PaymentStatus paymentStatus, BankResponse bankResponse) {
         bankErrorHandle(inquiryRefId, paymentStatus, bankResponse.getAmount(), bankResponse.getCurrency().getCurrencyCode());
-    }
-
-    @Transactional
-    public void bankErrorHandle(UUID inquiryRefId, PaymentStatus paymentStatus, BankRequest bankRequest) {
-        bankErrorHandle(inquiryRefId, paymentStatus, bankRequest.getAmount(), bankRequest.getCurrency());
     }
 
     @Transactional

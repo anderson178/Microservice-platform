@@ -23,6 +23,10 @@ public class BankResponse {
     private Instant createdAt;
     private Instant chargedAt;
 
+    public void ifPresent(Object errorDuringBankResponseProcessing) {
+
+    }
+
     public enum Status {
         PROCESSING, CANCELED, SUCCEEDED
     }

@@ -57,14 +57,14 @@ public class KafkaConsumerConfig {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-banking-request-group");
-        JacksonJsonDeserializer<BankRequest> jsonDeserializer = new JacksonJsonDeserializer<>(BankRequest.class);
-        jsonDeserializer.addTrustedPackages("*");
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
+        configProps.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, BankRequest.class.getName());
+        configProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        configProps.put(JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, false);
 
-        return new DefaultKafkaConsumerFactory<>(
-                configProps,
-                new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(jsonDeserializer)
-        );
+        return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean("bankingRequestListenerContainerFactory")
@@ -82,14 +82,14 @@ public class KafkaConsumerConfig {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-banking-request-check-status-group");
-        JacksonJsonDeserializer<BankResponse> jsonDeserializer = new JacksonJsonDeserializer<>(BankResponse.class);
-        jsonDeserializer.addTrustedPackages("*");
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
+        configProps.put(JacksonJsonDeserializer.VALUE_DEFAULT_TYPE, BankResponse.class.getName());
+        configProps.put(JacksonJsonDeserializer.TRUSTED_PACKAGES, "*");
+        configProps.put(JacksonJsonDeserializer.USE_TYPE_INFO_HEADERS, false);
 
-        return new DefaultKafkaConsumerFactory<>(
-                configProps,
-                new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(jsonDeserializer)
-        );
+        return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
     @Bean("bankingResponseListenerContainerFactory")

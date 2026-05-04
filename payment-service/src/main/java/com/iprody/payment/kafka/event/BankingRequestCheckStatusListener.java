@@ -52,34 +52,50 @@ public class BankingRequestCheckStatusListener {
         UUID inquiryId = UUID.fromString(record.key());
         log.info("Checking status for inquiryRefId {}", inquiryId);
 
-        UUID transactionId = record.value().getId();
+        String responseBody = fetchBankStatus(record.value().getId());
+        checkParseAndValidateResponse(responseBody);
+        processFinalStatus(inquiryId, record.value(), ack);
+    }
+
+    private String fetchBankStatus(UUID transactionId) {
         ResponseEntity<String> response = httpClientService.getPaymentStatus(transactionId);
+
         if (response == null || !response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Bank API unavailable, triggering retry...");
         }
 
-        if (StringUtils.isNotBlank(response.getBody())) {
-            BankResponse bankResponse = JsonStructUtils.fromJsonSafe(BankResponse.class, response.getBody());
-            if (bankResponse != null) {
+        String body = response.getBody();
+        if (StringUtils.isBlank(body)) {
+            log.error("Bank response body is empty for transaction {}", transactionId);
+            throw new IllegalArgumentException("Empty response from bank");
+        }
+        return body;
+    }
 
-                if (BankResponse.Status.PROCESSING.equals(bankResponse.getStatus())) {
-                    log.info("Payment transactionId {} still in progress, triggering delayed retry", transactionId);
-                    throw new PaymentStillProcessingException("Transaction " + bankResponse.getId() + " is not ready");
-                }
+    private void checkParseAndValidateResponse(String responseBody) {
+        BankResponse bankResponse = JsonStructUtils.fromJsonSafe(BankResponse.class, responseBody);
 
-                try {
-                    eventProcessorService.responseBankProcessing(inquiryId, record.value());
-                    ack.acknowledge();
-                } catch (Exception e) {
-                    log.error("Something went wrong", e);
-                    throw e;
-                }
-            } else {
-                log.error("Failed to parse bank response body");
-                throw new IllegalArgumentException("Invalid JSON format from bank");
-            }
+        if (bankResponse == null) {
+            log.error("Failed to parse bank response body: {}", responseBody);
+            throw new IllegalArgumentException("Invalid JSON format from bank");
+        }
+
+        if (BankResponse.Status.PROCESSING.equals(bankResponse.getStatus())) {
+            log.info("Payment transactionId {} still in progress, triggering delayed retry", bankResponse.getId());
+            throw new PaymentStillProcessingException("Transaction " + bankResponse.getId() + " is not ready");
         }
     }
+
+    private void processFinalStatus(UUID inquiryId, BankResponse recordValue, Acknowledgment ack) {
+        try {
+            eventProcessorService.responseBankProcessing(inquiryId, recordValue);
+            ack.acknowledge();
+        } catch (Exception e) {
+            log.error("Failed to process bank response for inquiryId {}", inquiryId, e);
+            throw e;
+        }
+    }
+
 
     // A handler for "suicide bombers" who failed the retreats
     // ack.acknowledge() - automatically
