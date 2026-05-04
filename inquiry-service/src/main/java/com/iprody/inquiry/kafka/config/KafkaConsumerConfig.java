@@ -1,6 +1,7 @@
 package com.iprody.inquiry.kafka.config;
 
 import com.iprody.common.kafka.CancellationResponse;
+import com.iprody.common.kafka.PaymentResponse;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,31 @@ public class KafkaConsumerConfig {
             ConsumerFactory<String, CancellationResponse> consumerFactory) {
 
         ConcurrentKafkaListenerContainerFactory<String, CancellationResponse> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return factory;
+    }
+
+    @Bean("paymentResponseConsumerFactory")
+    public ConsumerFactory<String, PaymentResponse> paymentResponseConsumerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-inquiry-group");
+        JacksonJsonDeserializer<PaymentResponse> jsonDeserializer = new JacksonJsonDeserializer<>(PaymentResponse.class);
+        jsonDeserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(
+                configProps,
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(jsonDeserializer)
+        );
+    }
+
+    @Bean("paymentResponseListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, PaymentResponse> paymentResponseListenerContainerFactory(
+            ConsumerFactory<String, PaymentResponse> consumerFactory) {
+
+        ConcurrentKafkaListenerContainerFactory<String, PaymentResponse> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;

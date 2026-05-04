@@ -1,9 +1,11 @@
 package com.iprody.inquiry.service;
 
-import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
 import com.iprody.common.kafka.CancellationRequest;
 import com.iprody.common.kafka.CancellationResponse;
 import com.iprody.common.kafka.CancellationStatus;
+import com.iprody.common.kafka.PaymentResponse;
+import com.iprody.common.struct.PaymentStatus;
+import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
@@ -40,6 +42,24 @@ public class EventProcessorService {
             inquiry.setNote("Cancellation rejected by external service: " + response.getReason());
         }
 
+        updateProcess(inquiry);
+    }
+
+
+    @Transactional
+    public void processPaymentResponse(PaymentResponse response) {
+        Inquiry inquiry = inquiryService.findById(response.getInquiryRefId());
+
+        if (PaymentStatus.RECEIVED.equals(response.getStatus())) {
+            inquiry.setStatus(InquiryStatus.PAYMENT);
+        } else {
+            inquiry.setNote("Payment rejected by external service: " + response.getReason());
+        }
+
+        updateProcess(inquiry);
+    }
+
+    private void updateProcess(Inquiry inquiry) {
         inquiry.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
         inquiryService.update(inquiry.getId(), InquiryMapper.INSTANCE.update(inquiry));
 

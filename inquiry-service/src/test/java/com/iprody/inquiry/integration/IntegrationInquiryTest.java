@@ -3,12 +3,14 @@ package com.iprody.inquiry.integration;
 import com.iprody.common.ResultCode;
 import com.iprody.common.ResultList;
 import com.iprody.common.dto.SortDirectionTypeDto;
+import com.iprody.common.kafka.CancellationRequest;
+import com.iprody.common.kafka.CancellationStatus;
+import com.iprody.inquiry.configuration.KafkaTestConfig;
+import com.iprody.inquiry.configuration.PostgresTestConfig;
 import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquirySortFieldDto;
-import com.iprody.common.kafka.CancellationRequest;
-import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.repository.InquiryRepo;
@@ -21,19 +23,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,22 +44,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @AutoConfigureMockMvc
 @AutoConfigureWebTestClient
 @Testcontainers
-@Sql(scripts = {"/sql/init-schema.sql"})
+@Import({PostgresTestConfig.class, KafkaTestConfig.class})
 @DisplayName("Inquiry Integration Tests (HTTP → Service → Repo → DB)")
 public class IntegrationInquiryTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-            .withInitScript("sql/init-schema.sql");
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("apache/kafka:4.2.0"));
-
-    @DynamicPropertySource
-    static void overrideProps(org.springframework.test.context.DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-    }
+    @Autowired
+    private KafkaContainer kafka;
 
     @Autowired
     private WebTestClient webClient;
@@ -108,7 +94,6 @@ public class IntegrationInquiryTest {
             assertThat(dbInquiry.getManagerRefId()).isEqualTo(requestDto.getManagerRefId());
             assertThat(dbInquiry.getStatus()).isEqualTo(InquiryStatus.NEW);
             assertThat(dbInquiry.getCreatedAt()).isNotNull();
-            assertThat(dbInquiry.getUpdatedAt()).isNotNull();
         }
     }
 

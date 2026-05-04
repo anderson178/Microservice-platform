@@ -1,5 +1,7 @@
 package com.iprody.inquiry.service;
 
+import com.iprody.common.kafka.PaymentResponse;
+import com.iprody.common.struct.PaymentStatus;
 import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
 import com.iprody.common.kafka.CancellationRequest;
 import com.iprody.common.kafka.CancellationResponse;
@@ -115,6 +117,94 @@ class EventProcessorServiceTest {
             when(inquiryService.findById(response.getId())).thenReturn(null);
 
             assertThatThrownBy(() -> eventProcessorService.processCancellationResponse(response))
+                    .isInstanceOf(NullPointerException.class);
+
+            verify(inquiryService, never()).update(any(), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("processPaymentResponse()")
+    class ProcessPaymentResponseTests {
+
+        @Test
+        @DisplayName("should set PAYMENT status when response is RECEIVED")
+        void processPaymentResponse_received_setsPaymentStatus() {
+            UUID inquiryId = UUID.randomUUID();
+            Inquiry inquiry = new Inquiry();
+            inquiry.setId(inquiryId);
+            inquiry.setStatus(InquiryStatus.IN_PROGRESS);
+            inquiry.setNote("Old note");
+
+            PaymentResponse response = new PaymentResponse();
+            response.setInquiryRefId(inquiryId);
+            response.setStatus(PaymentStatus.RECEIVED);
+            response.setReason(null);
+
+            Inquiry updatedInquiry = new Inquiry();
+            updatedInquiry.setId(inquiryId);
+            updatedInquiry.setStatus(InquiryStatus.PAYMENT);
+            updatedInquiry.setNote("Old note");
+            updatedInquiry.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+
+            when(inquiryService.findById(inquiryId)).thenReturn(inquiry);
+            when(inquiryService.update(eq(inquiryId), any(InquiryUpdateData.class)))
+                    .thenReturn(updatedInquiry);
+
+            eventProcessorService.processPaymentResponse(response);
+
+            verify(inquiryService).update(eq(inquiryId), argThat(
+                    data -> data != null && data.getStatus() == InquiryStatus.PAYMENT
+            ));
+
+            verify(inquiryService, never()).update(eq(inquiryId), argThat(
+                    data -> data != null && data.getNote() != null && data.getNote().contains("rejected")
+            ));
+        }
+
+        @Test
+        @DisplayName("should update note when payment is rejected")
+        void processPaymentResponse_rejected_updatesNote() {
+            UUID inquiryId = UUID.randomUUID();
+            Inquiry inquiry = new Inquiry();
+            inquiry.setId(inquiryId);
+            inquiry.setStatus(InquiryStatus.IN_PROGRESS);
+            inquiry.setNote("Old note");
+
+            PaymentResponse response = new PaymentResponse();
+            response.setInquiryRefId(inquiryId);
+            response.setStatus(PaymentStatus.NOT_SENT);
+            response.setReason("Insufficient funds");
+
+            Inquiry updatedInquiry = new Inquiry();
+            updatedInquiry.setId(inquiryId);
+            updatedInquiry.setStatus(InquiryStatus.IN_PROGRESS);
+            updatedInquiry.setNote("Payment rejected by external service: Insufficient funds");
+            updatedInquiry.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+
+            when(inquiryService.findById(inquiryId)).thenReturn(inquiry);
+            when(inquiryService.update(eq(inquiryId), any(InquiryUpdateData.class)))
+                    .thenReturn(updatedInquiry);
+
+            eventProcessorService.processPaymentResponse(response);
+
+            verify(inquiryService).update(eq(inquiryId), argThat(
+                    data -> data != null
+                            && data.getNote() != null
+                            && data.getNote().contains("Payment rejected by external service: Insufficient funds")
+            ));
+        }
+
+        @Test
+        @DisplayName("should propagate exception if inquiry not found")
+        void processPaymentResponse_notFound_propagatesException() {
+            PaymentResponse response = new PaymentResponse();
+            response.setInquiryRefId(UUID.randomUUID());
+            response.setStatus(PaymentStatus.RECEIVED);
+
+            when(inquiryService.findById(response.getInquiryRefId())).thenReturn(null);
+
+            assertThatThrownBy(() -> eventProcessorService.processPaymentResponse(response))
                     .isInstanceOf(NullPointerException.class);
 
             verify(inquiryService, never()).update(any(), any());
