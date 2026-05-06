@@ -82,11 +82,11 @@ class OutboxPublisherIntegrationTest {
             kafkaTemplate.flush();
             Thread.sleep(300);
 
-            String expectedTopic = OutboxEventType.CANCELLATION_REQUESTED.getPublishTopic();
+            String expectedTopic = OutboxEventType.CANCELLATION_RESPONSE.getTopic();
             subscribeToTopic(expectedTopic);
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(200, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<ConsumerRecord<String, Object>> records = pollRecords(Duration.ofMillis(200));
@@ -112,7 +112,7 @@ class OutboxPublisherIntegrationTest {
             UUID failedId = UUID.randomUUID();
             UUID pendingId = UUID.randomUUID();
 
-            String expectedTopic = OutboxEventType.CANCELLATION_REQUESTED.getPublishTopic();
+            String expectedTopic = OutboxEventType.CANCELLATION_RESPONSE.getTopic();
 
             outboxEventRepo.save(createOutboxEventWithStatus(publishedId, OutboxEventStatus.PUBLISHED));
             outboxEventRepo.save(createOutboxEventWithStatus(failedId, OutboxEventStatus.FAILED));
@@ -131,7 +131,7 @@ class OutboxPublisherIntegrationTest {
             testConsumer.seekToBeginning(Collections.singletonList(partition));
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(200, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<ConsumerRecord<String, Object>> records = pollRecords(Duration.ofMillis(200));
@@ -172,7 +172,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.GROUP)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.CANCELLATION_REQUESTED)
+                .eventType(OutboxEventType.CANCELLATION_RESPONSE)
                 .event(objectMapper.writeValueAsString(payload))
                 .status(OutboxEventStatus.PENDING)
                 .createdAt(Instant.now())
@@ -183,7 +183,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.GROUP)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.CANCELLATION_REQUESTED)
+                .eventType(OutboxEventType.CANCELLATION_RESPONSE)
                 .event("{\"test\":\"data\"}")
                 .status(status)
                 .createdAt(Instant.now().minusSeconds(10))

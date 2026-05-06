@@ -1,6 +1,7 @@
 package com.iprody.inventory.kafka.config;
 
 import com.iprody.common.kafka.CancellationRequest;
+import com.iprody.common.kafka.InventoryAvailabilityRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +25,25 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    private Map<String, Object> commonConsumerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
+        props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, 60_000);
+        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 45_000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 3_000);
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300_000);
+        props.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 500);
+
+        return props;
+    }
+
     @Bean("cancellationConsumerFactory")
     public ConsumerFactory<String, CancellationRequest> cancellationConsumerFactory() {
-        Map<String, Object> configProps = new HashMap<>();
+        Map<String, Object> configProps = commonConsumerConfigs();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-cancellation-group");
         JacksonJsonDeserializer<CancellationRequest> jsonDeserializer = new JacksonJsonDeserializer<>(CancellationRequest.class);
@@ -44,6 +61,31 @@ public class KafkaConsumerConfig {
             ConsumerFactory<String, CancellationRequest> consumerFactory) {
 
         ConcurrentKafkaListenerContainerFactory<String, CancellationRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return factory;
+    }
+
+    @Bean("inventoryAvailabilityRequestConsumerFactory")
+    public ConsumerFactory<String, InventoryAvailabilityRequest> inventoryAvailabilityRequestConsumerFactory() {
+        Map<String, Object> configProps = commonConsumerConfigs();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-availability-request-group");
+        JacksonJsonDeserializer<InventoryAvailabilityRequest> jsonDeserializer = new JacksonJsonDeserializer<>(InventoryAvailabilityRequest.class);
+        jsonDeserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(
+                configProps,
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(jsonDeserializer)
+        );
+    }
+
+    @Bean("inventoryAvailabilityRequestListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, InventoryAvailabilityRequest> inventoryAvailabilityRequestListenerContainerFactory(
+            ConsumerFactory<String, InventoryAvailabilityRequest> consumerFactory) {
+
+        ConcurrentKafkaListenerContainerFactory<String, InventoryAvailabilityRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;

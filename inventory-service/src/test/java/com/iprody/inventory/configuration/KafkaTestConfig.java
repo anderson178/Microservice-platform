@@ -32,11 +32,21 @@ public class KafkaTestConfig {
 
     @Bean
     public NewTopic cancellationRequestTopic() {
-        return new NewTopic(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), 1, (short) 1);
+        return new NewTopic(OutboxEventType.CANCELLATION_REQUEST.getTopic(), 1, (short) 1);
     }
 
     @Bean
     public NewTopic cancellationResponseTopic() {
-        return new NewTopic(OutboxEventType.CANCELLATION_REQUESTED.getPublishTopic(), 1, (short) 1);
+        return new NewTopic(OutboxEventType.CANCELLATION_RESPONSE.getTopic(), 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic availabilityRequestTopic() {
+        return new NewTopic(OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(), 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic availabilityResponseTopic() {
+        return new NewTopic(OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE.getTopic(), 1, (short) 1);
     }
 }
