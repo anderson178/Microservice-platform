@@ -87,7 +87,7 @@ class OutboxPublisherIntegrationTest {
             subscribeToTopic(expectedTopic);
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(10, TimeUnit.SECONDS)
                     .pollInterval(200, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<ConsumerRecord<String, Object>> records = pollRecords(Duration.ofMillis(200));
@@ -132,7 +132,7 @@ class OutboxPublisherIntegrationTest {
             testConsumer.seekToBeginning(Collections.singletonList(partition));
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(10, TimeUnit.SECONDS)
                     .pollInterval(200, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<ConsumerRecord<String, Object>> records = pollRecords(Duration.ofMillis(200));
@@ -173,7 +173,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.INQUIRY)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.PAYMENT_REQUEST)
+                .eventType(OutboxEventType.PAYMENT_RESPONSE)
                 .event(objectMapper.writeValueAsString(payload))
                 .status(OutboxEventStatus.PENDING)
                 .createdAt(Instant.now())
@@ -184,7 +184,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.INQUIRY)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.PAYMENT_REQUEST)
+                .eventType(OutboxEventType.PAYMENT_RESPONSE)
                 .event("{\"test\":\"data\"}")
                 .status(status)
                 .createdAt(Instant.now().minusSeconds(10))
