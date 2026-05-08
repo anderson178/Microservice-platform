@@ -46,7 +46,7 @@ public class OutboxPublisher {
     private void publishEvent(OutboxEvent event) {
         try {
             kafkaTemplate.send(
-                            event.getEventType().getPublishTopic(),
+                            event.getEventType().getTopic(),
                             event.getAggregateId().toString(),
                             objectMapper.readValue(event.getEvent(), Object.class))
                     .whenComplete((result, ex) -> {

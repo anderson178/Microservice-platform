@@ -51,10 +51,10 @@ class OutboxEventServiceTest {
 
         @Test
         @DisplayName("should serialize PaymentRequest and save to outbox with PENDING status")
-        void saveEvent_validCancellationRequest_savesSuccessfully() throws JsonProcessingException {
+        void saveEvent_validCancellationRequest_savesSuccessfully() {
             UUID inquiryId = UUID.randomUUID();
             OutboxAggregateType aggregateType = OutboxAggregateType.INQUIRY;
-            OutboxEventType eventType = OutboxEventType.PAYMENT_REQUESTED;
+            OutboxEventType eventType = OutboxEventType.PAYMENT_REQUEST;
 
             PaymentRequest payload = new PaymentRequest();
             payload.setInquiryRefId(inquiryId);
@@ -86,7 +86,7 @@ class OutboxEventServiceTest {
             outboxEventService.saveEvent(
                     OutboxAggregateType.INQUIRY,
                     inquiryId,
-                    OutboxEventType.PAYMENT_REQUESTED,
+                    OutboxEventType.PAYMENT_REQUEST,
                     payload
             );
 
@@ -115,7 +115,7 @@ class OutboxEventServiceTest {
                     outboxEventService.saveEvent(
                             OutboxAggregateType.INQUIRY,
                             payload.getInquiryRefId(),
-                            OutboxEventType.PAYMENT_REQUESTED,
+                            OutboxEventType.PAYMENT_REQUEST,
                             payload
                     ))
                     .isInstanceOf(RuntimeException.class)
@@ -139,7 +139,7 @@ class OutboxEventServiceTest {
                     outboxEventService.saveEvent(
                             OutboxAggregateType.INQUIRY,
                             UUID.randomUUID(),
-                            OutboxEventType.PAYMENT_REQUESTED,
+                            OutboxEventType.PAYMENT_REQUEST,
                             payload
                     ))
                     .isInstanceOf(RuntimeException.class);
@@ -155,7 +155,7 @@ class OutboxEventServiceTest {
             outboxEventService.saveEvent(
                     OutboxAggregateType.INQUIRY,
                     UUID.randomUUID(),
-                    OutboxEventType.PAYMENT_REQUESTED,
+                    OutboxEventType.PAYMENT_REQUEST,
                     null
             );
 

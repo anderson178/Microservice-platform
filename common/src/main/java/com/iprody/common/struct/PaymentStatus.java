@@ -20,5 +20,9 @@ public enum PaymentStatus {
     /**
      * The payment request has been received, but attempts to send it to the financial institution for processing were unsuccessful.
      */
-    NOT_SENT
+    NOT_SENT,
+    /**
+     * The request was rejected by the service
+     */
+    REJECTED
 }

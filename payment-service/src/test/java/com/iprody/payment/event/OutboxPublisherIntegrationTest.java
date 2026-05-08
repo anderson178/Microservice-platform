@@ -83,7 +83,7 @@ class OutboxPublisherIntegrationTest {
             kafkaTemplate.flush();
             Thread.sleep(300);
 
-            String expectedTopic = OutboxEventType.PAYMENT_REQUESTED.getPublishTopic();
+            String expectedTopic = OutboxEventType.PAYMENT_RESPONSE.getTopic();
             subscribeToTopic(expectedTopic);
 
             await()
@@ -113,7 +113,7 @@ class OutboxPublisherIntegrationTest {
             UUID failedId = UUID.randomUUID();
             UUID pendingId = UUID.randomUUID();
 
-            String expectedTopic = OutboxEventType.PAYMENT_REQUESTED.getPublishTopic();
+            String expectedTopic = OutboxEventType.PAYMENT_RESPONSE.getTopic();
 
             outboxEventRepo.save(createOutboxEventWithStatus(publishedId, OutboxEventStatus.PUBLISHED));
             outboxEventRepo.save(createOutboxEventWithStatus(failedId, OutboxEventStatus.FAILED));
@@ -173,7 +173,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.INQUIRY)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.PAYMENT_REQUESTED)
+                .eventType(OutboxEventType.PAYMENT_REQUEST)
                 .event(objectMapper.writeValueAsString(payload))
                 .status(OutboxEventStatus.PENDING)
                 .createdAt(Instant.now())
@@ -184,7 +184,7 @@ class OutboxPublisherIntegrationTest {
         return OutboxEvent.builder()
                 .aggregateType(OutboxAggregateType.INQUIRY)
                 .aggregateId(aggregateId)
-                .eventType(OutboxEventType.PAYMENT_REQUESTED)
+                .eventType(OutboxEventType.PAYMENT_REQUEST)
                 .event("{\"test\":\"data\"}")
                 .status(status)
                 .createdAt(Instant.now().minusSeconds(10))

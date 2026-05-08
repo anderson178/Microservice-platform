@@ -5,6 +5,7 @@ import com.iprody.payment.model.payment.Payment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -39,4 +40,19 @@ public interface PaymentRepo extends JpaRepository<Payment, UUID> {
     Optional<Payment> findByInquiryRefId(UUID inquiryRefId);
 
     List<Payment> findAllByInquiryRefId(UUID inquiryRefId);
+
+    @Modifying
+    @Query("update Payment p set p.paymentStatus = :status, p.transactionRefId = :transactionRefId where p.inquiryRefId = :inquiryRefId")
+    void updateByInquiryRefId(
+            @Param("inquiryRefId") UUID inquiryRefId,
+            @Param("status") PaymentStatus status,
+            @Param("transactionRefId") UUID transactionRefId
+    );
+
+    @Modifying
+    @Query("update Payment p set p.paymentStatus = :status where p.inquiryRefId = :inquiryRefId")
+    void updateByInquiryRefId(
+            @Param("inquiryRefId") UUID inquiryRefId,
+            @Param("status") PaymentStatus status
+    );
 }

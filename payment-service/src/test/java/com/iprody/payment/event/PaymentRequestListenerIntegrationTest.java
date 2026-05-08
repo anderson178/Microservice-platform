@@ -56,7 +56,7 @@ class PaymentRequestListenerIntegrationTest {
             PaymentRequest request = createValidPaymentRequest(inquiryRefId);
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
@@ -84,13 +84,13 @@ class PaymentRequestListenerIntegrationTest {
             PaymentRequest request = createValidPaymentRequest(inquiryRefId);
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
             // Duplicate
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
@@ -106,7 +106,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(saved.getPaymentStatus()).isEqualTo(PaymentStatus.RECEIVED);
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUESTED);
+                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
                         assertThat(events).hasSize(1);
                     });
         }
@@ -128,7 +128,7 @@ class PaymentRequestListenerIntegrationTest {
             UUID inquiryRefId = UUID.randomUUID();
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
@@ -141,7 +141,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(payments).isEmpty();
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUESTED);
+                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }
@@ -156,7 +156,7 @@ class PaymentRequestListenerIntegrationTest {
             request.setCurrency("USD");
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
@@ -169,7 +169,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(payments).isEmpty();
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUESTED);
+                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }
@@ -185,7 +185,7 @@ class PaymentRequestListenerIntegrationTest {
             request.setNote("Test");
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
             );
@@ -198,7 +198,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(payments).isEmpty();
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUESTED);
+                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }
@@ -218,7 +218,7 @@ class PaymentRequestListenerIntegrationTest {
             PaymentRequest duplicateRequest = createValidPaymentRequest(inquiryRefId);
 
             kafkaTemplate.send(
-                    OutboxEventType.PAYMENT_REQUESTED.getListenTopic(),
+                    OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     duplicateRequest
             );
@@ -231,7 +231,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(payments).hasSize(1);
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUESTED);
+                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
                         assertThat(events).hasSizeLessThanOrEqualTo(1);
                     });
         }

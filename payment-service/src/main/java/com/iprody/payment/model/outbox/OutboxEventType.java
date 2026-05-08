@@ -1,16 +1,18 @@
 package com.iprody.payment.model.outbox;
 
+import com.iprody.common.kafka.KafkaEventRout;
 import lombok.Getter;
 
 @Getter
 public enum OutboxEventType {
-    PAYMENT_REQUESTED("payment.request", "payment.response");
+    PAYMENT_REQUEST(KafkaEventRout.PAYMENT_REQUEST),
+    PAYMENT_RESPONSE(KafkaEventRout.PAYMENT_RESPONSE),
+    BANKING_REQUEST(KafkaEventRout.BANKING_REQUEST),
+    BANKING_RESPONSE(KafkaEventRout.BANKING_RESPONSE);
 
-    private final String listenTopic;
-    private final String publishTopic;
+    private final String topic;
 
-    OutboxEventType(String listenTopic, String publishTopic) {
-        this.listenTopic = listenTopic;
-        this.publishTopic = publishTopic;
+    OutboxEventType(String topic) {
+        this.topic = topic;
     }
 }

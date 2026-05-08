@@ -1,6 +1,5 @@
-package com.iprody.common.kafka;
+package com.iprody.payment.kafka.dto;
 
-import com.iprody.common.struct.PaymentStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -13,13 +12,13 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentResponse {
+public class BankRequest {
     @NotNull
     private UUID inquiryRefId;
+    @NotNull
+    private UUID paymentRefId;
     @NotNull
     private BigDecimal amount;
     @NotBlank
     private String currency;
-    private PaymentStatus status;
-    private String note;
 }
