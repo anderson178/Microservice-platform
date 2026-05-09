@@ -60,4 +60,10 @@ public class GroupService {
         int updatedRows = groupRepo.decrementCountByGroupRefIdId(groupRefId);
         return updatedRows > 0;
     }
+
+    @Transactional(readOnly = true)
+    public boolean availFreeSeats(UUID groupRefId, Long count) {
+        Group group = findByGroupRefId(groupRefId);
+        return group.getCurrentCount() + count <= group.getLimit();
+    }
 }

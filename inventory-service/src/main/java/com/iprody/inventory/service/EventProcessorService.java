@@ -1,7 +1,6 @@
 package com.iprody.inventory.service;
 
-import com.iprody.common.kafka.CancellationRequest;
-import com.iprody.common.kafka.CancellationStatus;
+import com.iprody.common.kafka.*;
 import com.iprody.inventory.model.OutboxAggregateType;
 import com.iprody.inventory.model.OutboxEventType;
 import lombok.RequiredArgsConstructor;
@@ -20,29 +19,45 @@ public class EventProcessorService {
 
 
     @Transactional
-    public void processCancellationRequest(UUID requestId, CancellationRequest request) {
+    public void processCancellationRequest(UUID inquiryRefId, CancellationRequest request) {
         groupService.checkFindByGroupRefId(request.getId());
         if (CancellationStatus.RECEIVED.equals(request.getStatus())) {
-            if (!outboxEventService.existsByAggregateIdAndType(requestId, OutboxEventType.CANCELLATION_REQUESTED)) {
+            if (!outboxEventService.existsByAggregateIdAndType(inquiryRefId, OutboxEventType.CANCELLATION_RESPONSE)) {
                 CancellationStatus status = groupService.cancellingReservation(request.getId())
                         ? CancellationStatus.SUCCESS
                         : CancellationStatus.FAILED;
-                saveEvent(requestId, status, request);
+                request.setStatus(status);
+                saveEvent(inquiryRefId, request, OutboxEventType.CANCELLATION_RESPONSE);
             } else {
-                log.info("Cancellation request with aggregationId={} already exists", requestId);
+                log.info("Cancellation request with aggregationId={} already exists", inquiryRefId);
             }
         } else {
             log.info("Cancellation request is not received status");
         }
     }
 
-    private void saveEvent(UUID requestId, CancellationStatus status, CancellationRequest request) {
-        request.setStatus(status);
+    public void processCheckAvailSeats(InventoryAvailabilityRequest request) {
+        groupService.checkFindByGroupRefId(request.getGroupRefId());
+        InventoryStatus status = groupService.availFreeSeats(request.getGroupRefId(), request.getNumberOfSeats())
+                ? InventoryStatus.SEATS_AVAILABLE_FOR_BOOKING
+                : InventoryStatus.SEATS_NOT_AVAILABLE_FOR_BOOKING;
+
+        saveEvent(
+                request.getInquiryRefId(),
+                new InventoryAvailabilityResponse(
+                        request.getInquiryRefId(),
+                        request.getGroupRefId(),
+                        status),
+                OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE
+        );
+    }
+
+    private <T> void saveEvent(UUID requestId, T event, OutboxEventType eventType) {
         outboxEventService.saveEvent(
                 OutboxAggregateType.GROUP,
                 requestId,
-                OutboxEventType.CANCELLATION_REQUESTED,
-                request
+                eventType,
+                event
         );
     }
 }

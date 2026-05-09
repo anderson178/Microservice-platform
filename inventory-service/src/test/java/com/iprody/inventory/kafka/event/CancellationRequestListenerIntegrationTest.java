@@ -60,21 +60,21 @@ class CancellationRequestListenerIntegrationTest {
             request.setStatus(CancellationStatus.RECEIVED);
             request.setReason("Customer requested cancellation");
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), inquiryId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), inquiryId.toString(), request);
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_RESPONSE);
 
                         assertThat(events).isNotEmpty();
                         OutboxEvent saved = events.get(0);
 
                         assertThat(saved.getAggregateType()).isEqualTo(OutboxAggregateType.GROUP);
                         assertThat(saved.getAggregateId()).isEqualTo(inquiryId);
-                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.CANCELLATION_REQUESTED);
+                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.CANCELLATION_RESPONSE);
                         assertThat(saved.getStatus()).isEqualTo(OutboxEventStatus.PENDING);
 
                         assertThat(saved.getEvent()).contains("\"status\": \"SUCCESS\"");
@@ -97,16 +97,16 @@ class CancellationRequestListenerIntegrationTest {
             request.setStatus(CancellationStatus.RECEIVED);
             request.setReason("First request");
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), inquiryId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), inquiryId.toString(), request);
             // Duplicate
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), inquiryId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), inquiryId.toString(), request);
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_RESPONSE);
 
                         assertThat(events).hasSize(1);
 
@@ -135,14 +135,14 @@ class CancellationRequestListenerIntegrationTest {
             request.setStatus(CancellationStatus.SUCCESS);
             request.setReason("Already processed");
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), inquiryId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), inquiryId.toString(), request);
 
             await()
                     .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_REQUEST);
                         assertThat(events).isEmpty();
 
                         Group unchanged = groupRepo.findByGroupRefId(groupRefId).orElseThrow();
@@ -160,14 +160,14 @@ class CancellationRequestListenerIntegrationTest {
             request.setId(nonExistentGroupRefId);
             request.setStatus(CancellationStatus.RECEIVED);
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), inquiryId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), inquiryId.toString(), request);
 
             await()
                     .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }
@@ -183,14 +183,14 @@ class CancellationRequestListenerIntegrationTest {
             request.setId(null);
             request.setStatus(CancellationStatus.RECEIVED);
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), groupRefId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), groupRefId.toString(), request);
 
             await()
                     .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }
@@ -206,14 +206,14 @@ class CancellationRequestListenerIntegrationTest {
             request.setId(groupRefId);
             request.setStatus(null);
 
-            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUESTED.getListenTopic(), groupRefId.toString(), request);
+            kafkaTemplate.send(OutboxEventType.CANCELLATION_REQUEST.getTopic(), groupRefId.toString(), request);
 
             await()
                     .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryId, OutboxEventType.CANCELLATION_REQUESTED);
+                                inquiryId, OutboxEventType.CANCELLATION_REQUEST);
                         assertThat(events).isEmpty();
                     });
         }

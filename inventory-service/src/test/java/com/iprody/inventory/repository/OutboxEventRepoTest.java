@@ -51,17 +51,17 @@ class OutboxEventRepoTest {
             void findPendingEvents_returnsOrderedByCreatedAt() {
                 OutboxEvent oldEvent = createPendingEvent(
                         OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED,
+                        OutboxEventType.CANCELLATION_REQUEST,
                         Instant.now().minusSeconds(100)
                 );
                 OutboxEvent middleEvent = createPendingEvent(
                         OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED,
+                        OutboxEventType.CANCELLATION_REQUEST,
                         Instant.now().minusSeconds(50)
                 );
                 OutboxEvent newEvent = createPendingEvent(
                         OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED,
+                        OutboxEventType.CANCELLATION_REQUEST,
                         Instant.now()
                 );
 
@@ -81,11 +81,11 @@ class OutboxEventRepoTest {
             void findPendingEvents_filtersByPendingStatus() {
                 OutboxEvent pending1 = createPendingEvent(
                         OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED, Instant.now()
+                        OutboxEventType.CANCELLATION_REQUEST, Instant.now()
                 );
                 OutboxEvent pending2 = createPendingEvent(
                         OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED, Instant.now().minusSeconds(5)
+                        OutboxEventType.CANCELLATION_REQUEST, Instant.now().minusSeconds(5)
                 );
 
                 List<OutboxEvent> result = outboxEventRepo.findPendingEvents(Pageable.unpaged());
@@ -104,7 +104,7 @@ class OutboxEventRepoTest {
                 for (int i = 0; i < 10; i++) {
                     createPendingEvent(
                             OutboxAggregateType.GROUP, UUID.randomUUID(),
-                            OutboxEventType.CANCELLATION_REQUESTED,
+                            OutboxEventType.CANCELLATION_REQUEST,
                             Instant.now().minusSeconds(100 - i * 10)
                     );
                 }
@@ -122,10 +122,10 @@ class OutboxEventRepoTest {
             @DisplayName("should return empty list when no pending events exist")
             void findPendingEvents_noPending_returnsEmpty() {
                 createEventWithStatus(OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED,
+                        OutboxEventType.CANCELLATION_REQUEST,
                         OutboxEventStatus.PUBLISHED, Instant.now());
                 createEventWithStatus(OutboxAggregateType.GROUP, UUID.randomUUID(),
-                        OutboxEventType.CANCELLATION_REQUESTED,
+                        OutboxEventType.CANCELLATION_REQUEST,
                         OutboxEventStatus.FAILED, Instant.now());
 
                 List<OutboxEvent> result = outboxEventRepo.findPendingEvents(Pageable.unpaged());
@@ -160,7 +160,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return true when event exists with matching aggregateId and eventType")
             void existsByAggregateIdAndEventType_found_returnsTrue() {
                 UUID aggregateId = UUID.randomUUID();
-                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
                 createPendingEvent(OutboxAggregateType.GROUP, aggregateId, eventType, Instant.now());
 
@@ -173,7 +173,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return true regardless of event status")
             void existsByAggregateIdAndEventType_ignoresStatus_returnsTrue() {
                 UUID aggregateId = UUID.randomUUID();
-                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
                 createEventWithStatus(OutboxAggregateType.GROUP, aggregateId, eventType,
                         OutboxEventStatus.PUBLISHED, Instant.now().minusSeconds(100));
@@ -190,7 +190,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return true when multiple events match (at least one exists)")
             void existsByAggregateIdAndEventType_multipleMatches_returnsTrue() {
                 UUID aggregateId = UUID.randomUUID();
-                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
                 createPendingEvent(OutboxAggregateType.GROUP, aggregateId, eventType, Instant.now().minusSeconds(10));
 
@@ -208,7 +208,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return false when no event matches aggregateId and eventType")
             void existsByAggregateIdAndEventType_notFound_returnsFalse() {
                 UUID nonExistentAggregateId = UUID.randomUUID();
-                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
                 createPendingEvent(OutboxAggregateType.GROUP, UUID.randomUUID(), eventType, Instant.now());
 
@@ -220,7 +220,7 @@ class OutboxEventRepoTest {
             @Test
             @DisplayName("should return false when eventType matches but aggregateId differs")
             void existsByAggregateIdAndEventType_wrongAggregateId_returnsFalse() {
-                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+                OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
                 createPendingEvent(OutboxAggregateType.GROUP, UUID.randomUUID(), eventType, Instant.now());
 
@@ -234,7 +234,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return false when table is empty")
             void existsByAggregateIdAndEventType_emptyTable_returnsFalse() {
                 boolean exists = outboxEventRepo.existsByAggregateIdAndEventType(
-                        UUID.randomUUID(), OutboxEventType.CANCELLATION_REQUESTED);
+                        UUID.randomUUID(), OutboxEventType.CANCELLATION_REQUEST);
 
                 assertThat(exists).isFalse();
             }
@@ -243,7 +243,7 @@ class OutboxEventRepoTest {
             @DisplayName("should return false when aggregateId is null")
             void existsByAggregateIdAndEventType_nullAggregateId_returnsFalse() {
                 boolean exists = outboxEventRepo.existsByAggregateIdAndEventType(
-                        null, OutboxEventType.CANCELLATION_REQUESTED);
+                        null, OutboxEventType.CANCELLATION_REQUEST);
 
                 assertThat(exists).isFalse();
             }

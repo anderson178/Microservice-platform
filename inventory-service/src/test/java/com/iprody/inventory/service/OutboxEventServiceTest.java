@@ -54,7 +54,7 @@ class OutboxEventServiceTest {
         void saveEvent_validCancellationRequest_savesSuccessfully() throws JsonProcessingException {
             UUID inquiryId = UUID.randomUUID();
             OutboxAggregateType aggregateType = OutboxAggregateType.GROUP;
-            OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUESTED;
+            OutboxEventType eventType = OutboxEventType.CANCELLATION_REQUEST;
 
             CancellationRequest payload = new CancellationRequest();
             payload.setId(inquiryId);
@@ -95,7 +95,7 @@ class OutboxEventServiceTest {
             outboxEventService.saveEvent(
                     OutboxAggregateType.GROUP,
                     inquiryId,
-                    OutboxEventType.CANCELLATION_REQUESTED,
+                    OutboxEventType.CANCELLATION_REQUEST,
                     payload
             );
 
@@ -124,7 +124,7 @@ class OutboxEventServiceTest {
                     outboxEventService.saveEvent(
                             OutboxAggregateType.GROUP,
                             payload.getId(),
-                            OutboxEventType.CANCELLATION_REQUESTED,
+                            OutboxEventType.CANCELLATION_REQUEST,
                             payload
                     ))
                     .isInstanceOf(RuntimeException.class)
@@ -148,7 +148,7 @@ class OutboxEventServiceTest {
                     outboxEventService.saveEvent(
                             OutboxAggregateType.GROUP,
                             UUID.randomUUID(),
-                            OutboxEventType.CANCELLATION_REQUESTED,
+                            OutboxEventType.CANCELLATION_REQUEST,
                             payload
                     ))
                     .isInstanceOf(RuntimeException.class);
@@ -164,7 +164,7 @@ class OutboxEventServiceTest {
             outboxEventService.saveEvent(
                     OutboxAggregateType.GROUP,
                     UUID.randomUUID(),
-                    OutboxEventType.CANCELLATION_REQUESTED,
+                    OutboxEventType.CANCELLATION_REQUEST,
                     null
             );
 

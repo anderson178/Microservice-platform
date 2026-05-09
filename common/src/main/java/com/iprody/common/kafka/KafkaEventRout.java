@@ -8,4 +8,8 @@ public final class KafkaEventRout {
     public static final String PAYMENT_RESPONSE = "payment.response";
     public static final String BANKING_REQUEST = "banking.request";
     public static final String BANKING_RESPONSE = "banking.response";
+    public static final String CANCELLATION_REQUEST = "cancellation.request";
+    public static final String CANCELLATION_RESPONSE = "cancellation.response";
+    public static final String INVENTORY_AVAILABILITY_REQUEST = "inventory.availability.request";
+    public static final String INVENTORY_AVAILABILITY_RESPONSE = "inventory.availability.response";
 }

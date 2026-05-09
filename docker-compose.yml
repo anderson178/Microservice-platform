@@ -9,9 +9,9 @@ services:
       - "8443:8443"
       - "8005:5005"
     environment:
-        - SPRING_PROFILES_ACTIVE=docker
-        - DB_USER=${DB_USER}
-        - DB_PASSWORD=${DB_PASSWORD}
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       payment-postgres:
         condition: service_healthy
@@ -243,7 +243,6 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
-#      - "9094:9094"
     environment:
       KAFKA_NODE_ID: 0
       KAFKA_PROCESS_ROLES: 'broker,controller'
