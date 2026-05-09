@@ -5,6 +5,7 @@ import com.iprody.common.Pagination;
 import com.iprody.common.ResultCode;
 import com.iprody.common.ResultList;
 import com.iprody.common.exception.AppException;
+import com.iprody.common.kafka.InventoryStatus;
 import com.iprody.inventory.mapper.GroupMapper;
 import com.iprody.inventory.model.Group;
 import com.iprody.inventory.model.GroupData;
@@ -61,9 +62,10 @@ public class GroupService {
         return updatedRows > 0;
     }
 
-    @Transactional(readOnly = true)
-    public boolean availFreeSeats(UUID groupRefId, Long count) {
-        Group group = findByGroupRefId(groupRefId);
-        return group.getCurrentCount() + count <= group.getLimit();
+    @Transactional
+    public InventoryStatus attemptReservation(UUID groupRefId, Long requested) {
+        return groupRepo.increase(groupRefId, requested) > 0
+                ? InventoryStatus.RESERVED
+                : InventoryStatus.ROLLBACK;
     }
 }

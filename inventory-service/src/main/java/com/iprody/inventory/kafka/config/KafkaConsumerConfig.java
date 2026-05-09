@@ -1,7 +1,7 @@
 package com.iprody.inventory.kafka.config;
 
 import com.iprody.common.kafka.CancellationRequest;
-import com.iprody.common.kafka.InventoryAvailabilityRequest;
+import com.iprody.common.kafka.InventoryRequest;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,11 +67,11 @@ public class KafkaConsumerConfig {
     }
 
     @Bean("inventoryAvailabilityRequestConsumerFactory")
-    public ConsumerFactory<String, InventoryAvailabilityRequest> inventoryAvailabilityRequestConsumerFactory() {
+    public ConsumerFactory<String, InventoryRequest> inventoryAvailabilityRequestConsumerFactory() {
         Map<String, Object> configProps = commonConsumerConfigs();
         configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-availability-request-group");
-        JacksonJsonDeserializer<InventoryAvailabilityRequest> jsonDeserializer = new JacksonJsonDeserializer<>(InventoryAvailabilityRequest.class);
+        JacksonJsonDeserializer<InventoryRequest> jsonDeserializer = new JacksonJsonDeserializer<>(InventoryRequest.class);
         jsonDeserializer.addTrustedPackages("*");
 
         return new DefaultKafkaConsumerFactory<>(
@@ -81,11 +81,11 @@ public class KafkaConsumerConfig {
         );
     }
 
-    @Bean("inventoryAvailabilityRequestListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, InventoryAvailabilityRequest> inventoryAvailabilityRequestListenerContainerFactory(
-            ConsumerFactory<String, InventoryAvailabilityRequest> consumerFactory) {
+    @Bean("inventoryRequestListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, InventoryRequest> inventoryRequestListenerContainerFactory(
+            ConsumerFactory<String, InventoryRequest> consumerFactory) {
 
-        ConcurrentKafkaListenerContainerFactory<String, InventoryAvailabilityRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, InventoryRequest> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
