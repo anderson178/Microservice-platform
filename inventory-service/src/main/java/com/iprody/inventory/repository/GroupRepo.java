@@ -35,8 +35,8 @@ public interface GroupRepo extends JpaRepository<Group, UUID> {
 
     @Modifying
     @Query("""
-            UPDATE Group g SET g.currentCount = g.currentCount + :requested
-            WHERE g.groupRefId = :groupRefId AND (g.currentCount + :requested <= g.limit)
+            UPDATE Group g SET g.currentCount = g.currentCount + :count
+            WHERE g.groupRefId = :groupRefId AND (g.currentCount + :count <= g.limit)
             """)
     int increase(@Param("groupRefId") UUID groupRefId,
                  @Param("count") Long count);
