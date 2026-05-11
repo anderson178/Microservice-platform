@@ -11,10 +11,13 @@ import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquirySortFieldDto;
+import com.iprody.inquiry.kafka.event.OutboxPublisher;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.repository.InquiryRepo;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,13 +35,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.UUID;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
@@ -55,6 +58,8 @@ public class IntegrationInquiryTest {
 
     @Autowired
     private InquiryRepo inquiryRepo;
+    @Autowired
+    private OutboxPublisher outboxPublisher;
 
     @BeforeEach
     void setUp() {
@@ -281,23 +286,42 @@ public class IntegrationInquiryTest {
                     .exchange()
                     .expectStatus().isAccepted();
 
+            outboxPublisher.publishPendingEvents();
+
             String bootstrapServers = kafka.getBootstrapServers();
-            try (var consumer = createTestConsumer(bootstrapServers)) {
+            try (KafkaConsumer<String, CancellationRequest> consumer = createTestConsumer(bootstrapServers)) {
                 consumer.subscribe(Collections.singletonList("cancellation.request"));
 
-                var found = Stream
-                        .generate(() -> consumer.poll(java.time.Duration.ofMillis(100)))
-                        .limit(100)
-                        .flatMap(records -> StreamSupport.stream(
-                                records.records("cancellation.request").spliterator(), false))
-                        .filter(record -> inquiryId.toString().equals(record.key()))
-                        .findFirst();
+                var found = await()
+                        .atMost(5, TimeUnit.SECONDS)
+                        .pollInterval(100, TimeUnit.MILLISECONDS)
+                        .until(() -> {
+                            List<ConsumerRecord<String, CancellationRequest>> records = pollRecords(consumer, Duration.ofMillis(100));
+                            return records.stream()
+                                    .filter(record -> inquiryId.toString().equals(record.key()))
+                                    .findFirst();
+                        }, Optional::isPresent);
 
+                assertThat(found.get().value().getId()).isEqualTo(inquiryId);
                 assertThat(found).as("Message should be published to cancellation.request").isPresent();
                 assertThat(found.get().value().getId()).isEqualTo(inquiryId);
                 assertThat(found.get().value().getStatus()).isEqualTo(CancellationStatus.RECEIVED);
                 assertThat(found.get().value().getReason()).isEqualTo("Customer requested cancellation");
             }
+        }
+
+        private List<ConsumerRecord<String, CancellationRequest>> pollRecords(KafkaConsumer<String, CancellationRequest> consumer, Duration timeout) {
+            List<ConsumerRecord<String, CancellationRequest>> allRecords = new ArrayList<>();
+            Instant endTime = Instant.now().plus(timeout);
+
+            while (Instant.now().isBefore(endTime)) {
+                ConsumerRecords<String, CancellationRequest> records = consumer.poll(Duration.ofMillis(100));
+
+                for (ConsumerRecord<String, CancellationRequest> record : records) {
+                    allRecords.add(record);
+                }
+            }
+            return allRecords;
         }
 
         @Test

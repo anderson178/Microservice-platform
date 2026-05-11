@@ -4,7 +4,7 @@ import com.iprody.common.kafka.CancellationResponse;
 import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.inquiry.kafka.event.CancellationResponseListener;
 import com.iprody.inquiry.service.EventProcessorService;
-import jakarta.validation.Validator;
+import com.iprody.inquiry.service.ValidateService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.record.TimestampType;
@@ -31,13 +31,14 @@ class CancellationResponseListenerTest {
     private Acknowledgment acknowledgment;
 
     @Mock
-    private Validator validator;
+    private ValidateService validator;
 
     private CancellationResponseListener listener;
 
     @BeforeEach
     void setUp() {
         listener = new CancellationResponseListener(eventProcessorService, validator);
+        when(validator.validate(any())).thenReturn(true);
     }
 
     @Test

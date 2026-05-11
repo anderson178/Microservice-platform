@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: 0.0.2-add_outbox_table.yml
+      relativeToChangelogFile: true

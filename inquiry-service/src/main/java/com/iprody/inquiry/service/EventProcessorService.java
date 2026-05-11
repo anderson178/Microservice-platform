@@ -5,10 +5,11 @@ import com.iprody.common.kafka.CancellationResponse;
 import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.common.kafka.PaymentResponse;
 import com.iprody.common.struct.PaymentStatus;
-import com.iprody.inquiry.kafka.event.CancellationEventPublisher;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
+import com.iprody.inquiry.model.OutboxAggregateType;
+import com.iprody.inquiry.model.OutboxEventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -17,17 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventProcessorService {
     private final InquiryService inquiryService;
-    private final CancellationEventPublisher cancellationEventPublisher;
+    private final OutboxEventService outboxEventService;
 
-    public void processCancellationRequest(CancellationRequest cancellationRequest) {
-        inquiryService.checkById(cancellationRequest.getId());
-        cancellationEventPublisher.publish(cancellationRequest);
+    public void processCancellationRequest(CancellationRequest request) {
+        inquiryService.checkById(request.getId());
+        saveEvent(request.getId(), request, OutboxEventType.CANCELLATION_REQUEST);
     }
 
     @Transactional
@@ -45,6 +47,14 @@ public class EventProcessorService {
         updateProcess(inquiry);
     }
 
+    private <T> void saveEvent(UUID requestId, T event, OutboxEventType eventType) {
+        outboxEventService.saveEvent(
+                OutboxAggregateType.INQUIRY,
+                requestId,
+                eventType,
+                event
+        );
+    }
 
     @Transactional
     public void processPaymentResponse(PaymentResponse response) {

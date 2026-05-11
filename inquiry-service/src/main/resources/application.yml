@@ -1,3 +1,8 @@
+app:
+  outbox:
+    batch-size: 50
+    poll-interval-ms: 20_000
+
 server:
   port: 8080
 #server:

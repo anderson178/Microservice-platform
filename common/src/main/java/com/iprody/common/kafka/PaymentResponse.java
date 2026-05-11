@@ -21,5 +21,5 @@ public class PaymentResponse {
     @NotBlank
     private String currency;
     private PaymentStatus status;
-    private String note;
+    private String reason;
 }

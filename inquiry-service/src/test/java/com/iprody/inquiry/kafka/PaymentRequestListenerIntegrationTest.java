@@ -1,5 +1,6 @@
 package com.iprody.inquiry.kafka;
 
+import com.iprody.common.kafka.KafkaEventRout;
 import com.iprody.common.kafka.PaymentResponse;
 import com.iprody.common.struct.PaymentStatus;
 import com.iprody.inquiry.configuration.KafkaTestConfig;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -45,18 +47,18 @@ class PaymentRequestListenerIntegrationTest {
         @Test
         @DisplayName("should process SUCCESS payment response and update Inquiry status to PAYMENT")
         void consume_successPaymentResponse_updatesInquiryStatus() {
-            UUID inquiryId = inquiryRepo.save(createInquiry()).getId();
+            UUID inquiryId = inquiryRepo.save(createInquiry(InquiryStatus.PAYMENT)).getId();
 
             PaymentResponse response = new PaymentResponse();
             response.setInquiryRefId(inquiryId);
             response.setStatus(PaymentStatus.RECEIVED);
             response.setReason("Payment processed");
 
-            kafkaTemplate.send("payment.response", inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         Inquiry updatedInquiry = inquiryRepo.findById(inquiryId)
@@ -70,18 +72,20 @@ class PaymentRequestListenerIntegrationTest {
         @Test
         @DisplayName("should process FAILED payment response and update Inquiry note")
         void consume_failedPaymentResponse_updatesInquiryNote() {
-            UUID inquiryId = inquiryRepo.save(createInquiry()).getId();
+            UUID inquiryId = inquiryRepo.save(createInquiry(InquiryStatus.IN_PROGRESS)).getId();
 
             PaymentResponse response = new PaymentResponse();
             response.setInquiryRefId(inquiryId);
             response.setStatus(PaymentStatus.NOT_SENT);
+            response.setAmount(new BigDecimal("100.00"));
+            response.setCurrency("USD");
             response.setReason("Insufficient funds");
 
-            kafkaTemplate.send("payment.response", inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(5, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         Inquiry updatedInquiry = inquiryRepo.findById(inquiryId)
@@ -101,12 +105,12 @@ class PaymentRequestListenerIntegrationTest {
         @Test
         @DisplayName("should not process when inquiryRefId is null (violates @NotNull)")
         void consume_nullInquiryRefId_doesNotUpdate() {
-            UUID inquiryId = inquiryRepo.save(createInquiry()).getId();
+            UUID inquiryId = inquiryRepo.save(createInquiry(InquiryStatus.IN_PROGRESS)).getId();
 
             PaymentResponse response = new PaymentResponse();
             response.setStatus(PaymentStatus.RECEIVED);
 
-            kafkaTemplate.send("payment.response", UUID.randomUUID().toString(), response);
+            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, UUID.randomUUID().toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -122,13 +126,13 @@ class PaymentRequestListenerIntegrationTest {
         @Test
         @DisplayName("should not process when status is null (violates @NotNull)")
         void consume_nullStatus_doesNotUpdate() {
-            UUID inquiryId = inquiryRepo.save(createInquiry()).getId();
+            UUID inquiryId = inquiryRepo.save(createInquiry(InquiryStatus.IN_PROGRESS)).getId();
 
             PaymentResponse response = new PaymentResponse();
             response.setInquiryRefId(inquiryId);
             response.setReason("Test");
 
-            kafkaTemplate.send("payment.response", inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -150,7 +154,7 @@ class PaymentRequestListenerIntegrationTest {
             response.setInquiryRefId(nonExistentInquiryId);
             response.setStatus(PaymentStatus.RECEIVED);
 
-            kafkaTemplate.send("payment.response", nonExistentInquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, nonExistentInquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -162,12 +166,12 @@ class PaymentRequestListenerIntegrationTest {
         }
     }
 
-    private Inquiry createInquiry() {
+    private Inquiry createInquiry(InquiryStatus status) {
         Inquiry inquiry = new Inquiry();
         inquiry.setCustomerRefId(UUID.randomUUID());
         inquiry.setManagerRefId(UUID.randomUUID());
         inquiry.setProductRefId(UUID.randomUUID());
-        inquiry.setStatus(InquiryStatus.IN_PROGRESS);
+        inquiry.setStatus(status);
         inquiry.setSource("web");
 
         return inquiry;
