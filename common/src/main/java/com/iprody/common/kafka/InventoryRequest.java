@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class InventoryAvailabilityRequest {
+public class InventoryRequest {
     private UUID inquiryRefId;
     private UUID groupRefId;
     private Long numberOfSeats;

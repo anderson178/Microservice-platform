@@ -1,6 +1,6 @@
 package com.iprody.inventory.kafka.event;
 
-import com.iprody.common.kafka.InventoryAvailabilityRequest;
+import com.iprody.common.kafka.InventoryRequest;
 import com.iprody.inventory.configuration.KafkaTestConfig;
 import com.iprody.inventory.configuration.PostgresTestConfig;
 import com.iprody.inventory.model.*;
@@ -27,7 +27,7 @@ import static org.awaitility.Awaitility.await;
 @Testcontainers
 @Import({PostgresTestConfig.class, KafkaTestConfig.class})
 @DisplayName("InventoryAvailabilityRequestListener Integration Test")
-public class InventoryAvailabilityRequestListenerIntegrationTest {
+public class InventoryRequestListenerIT {
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -48,16 +48,16 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
     class PositiveTests {
 
         @Test
-        @DisplayName("should process request with available seats and save event with SEATS_AVAILABLE_FOR_BOOKING status")
+        @DisplayName("should process request with available seats and save event with RESERVED status")
         void consume_requestWithAvailableSeats_savesAvailableEvent() {
             UUID inquiryRefId = UUID.randomUUID();
             UUID groupRefId = UUID.randomUUID();
             createGroup(groupRefId, 5L);
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, groupRefId, 3L)
+                    new InventoryRequest(inquiryRefId, groupRefId, 3L)
             );
 
             await()
@@ -65,32 +65,32 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
 
                         assertThat(events).isNotEmpty();
                         OutboxEvent saved = events.get(0);
 
                         assertThat(saved.getAggregateType()).isEqualTo(OutboxAggregateType.GROUP);
                         assertThat(saved.getAggregateId()).isEqualTo(inquiryRefId);
-                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.INVENTORY_RESPONSE);
                         assertThat(saved.getStatus()).isEqualTo(OutboxEventStatus.PENDING);
 
-                        assertThat(saved.getEvent()).contains("\"status\": \"SEATS_AVAILABLE_FOR_BOOKING\"");
+                        assertThat(saved.getEvent()).contains("\"status\": \"RESERVED\"");
                         assertThat(saved.getEvent()).contains("\"groupRefId\": \"" + groupRefId + "\"");
                     });
         }
 
         @Test
-        @DisplayName("should process request with insufficient seats and save event with SEATS_NOT_AVAILABLE_FOR_BOOKING status")
+        @DisplayName("should process request with insufficient seats and save event with ROLLBACK status")
         void consume_requestWithInsufficientSeats_savesNotAvailableEvent() {
             UUID inquiryRefId = UUID.randomUUID();
             UUID groupRefId = UUID.randomUUID();
             createGroup(groupRefId, 8L);
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, groupRefId, 5L)
+                    new InventoryRequest(inquiryRefId, groupRefId, 5L)
             );
 
             await()
@@ -98,17 +98,17 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
 
                         assertThat(events).isNotEmpty();
                         OutboxEvent saved = events.get(0);
 
                         assertThat(saved.getAggregateType()).isEqualTo(OutboxAggregateType.GROUP);
                         assertThat(saved.getAggregateId()).isEqualTo(inquiryRefId);
-                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                        assertThat(saved.getEventType()).isEqualTo(OutboxEventType.INVENTORY_RESPONSE);
                         assertThat(saved.getStatus()).isEqualTo(OutboxEventStatus.PENDING);
 
-                        assertThat(saved.getEvent()).contains("\"status\": \"SEATS_NOT_AVAILABLE_FOR_BOOKING\"");
+                        assertThat(saved.getEvent()).contains("\"status\": \"ROLLBACK\"");
                         assertThat(saved.getEvent()).contains("\"groupRefId\": \"" + groupRefId + "\"");
                     });
         }
@@ -121,9 +121,9 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
             createGroup(groupRefId, 5L);
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, groupRefId, 5L)
+                    new InventoryRequest(inquiryRefId, groupRefId, 5L)
             );
 
             await()
@@ -131,12 +131,12 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
 
                         assertThat(events).isNotEmpty();
                         OutboxEvent saved = events.get(0);
 
-                        assertThat(saved.getEvent()).contains("\"status\": \"SEATS_AVAILABLE_FOR_BOOKING\"");
+                        assertThat(saved.getEvent()).contains("\"status\": \"RESERVED\"");
                     });
         }
     }
@@ -151,9 +151,9 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
             UUID inquiryRefId = UUID.randomUUID();
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, UUID.randomUUID(), 1L)
+                    new InventoryRequest(inquiryRefId, UUID.randomUUID(), 1L)
             );
 
             await()
@@ -161,7 +161,7 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
                         assertThat(events).isEmpty();
                     });
         }
@@ -172,9 +172,9 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
             UUID groupRefId = UUID.randomUUID();
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     groupRefId.toString(),
-                    new InventoryAvailabilityRequest(null, UUID.randomUUID(), 1L)
+                    new InventoryRequest(null, UUID.randomUUID(), 1L)
             );
 
             await()
@@ -192,9 +192,9 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
             UUID inquiryRefId = UUID.randomUUID();
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, null, 1L)
+                    new InventoryRequest(inquiryRefId, null, 1L)
             );
 
             await()
@@ -202,7 +202,7 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
                         assertThat(events).isEmpty();
                     });
         }
@@ -213,9 +213,9 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
             UUID inquiryRefId = UUID.randomUUID();
 
             kafkaTemplate.send(
-                    OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(),
+                    OutboxEventType.INVENTORY_REQUEST.getTopic(),
                     inquiryRefId.toString(),
-                    new InventoryAvailabilityRequest(inquiryRefId, UUID.randomUUID(), null)
+                    new InventoryRequest(inquiryRefId, UUID.randomUUID(), null)
             );
 
             await()
@@ -223,7 +223,7 @@ public class InventoryAvailabilityRequestListenerIntegrationTest {
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE);
+                                inquiryRefId, OutboxEventType.INVENTORY_RESPONSE);
                         assertThat(events).isEmpty();
                     });
         }

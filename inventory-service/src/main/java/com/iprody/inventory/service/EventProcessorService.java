@@ -21,35 +21,47 @@ public class EventProcessorService {
     @Transactional
     public void processCancellationRequest(UUID inquiryRefId, CancellationRequest request) {
         groupService.checkFindByGroupRefId(request.getId());
-        if (CancellationStatus.RECEIVED.equals(request.getStatus())) {
-            if (!outboxEventService.existsByAggregateIdAndType(inquiryRefId, OutboxEventType.CANCELLATION_RESPONSE)) {
-                CancellationStatus status = groupService.cancellingReservation(request.getId())
-                        ? CancellationStatus.SUCCESS
-                        : CancellationStatus.FAILED;
-                request.setStatus(status);
-                saveEvent(inquiryRefId, request, OutboxEventType.CANCELLATION_RESPONSE);
-            } else {
-                log.info("Cancellation request with aggregationId={} already exists", inquiryRefId);
-            }
-        } else {
-            log.info("Cancellation request is not received status");
+
+        if (!CancellationStatus.RECEIVED.equals(request.getStatus())) {
+            log.info("Cancellation request {} has invalid status: {}", inquiryRefId, request.getStatus());
+            return;
         }
+
+        if (isAlreadyProcessed(inquiryRefId, OutboxEventType.CANCELLATION_RESPONSE)) {
+            log.info("Cancellation request with aggregationId={} already processed", inquiryRefId);
+            return;
+        }
+
+        CancellationStatus status = groupService.cancellingReservation(request.getId())
+                ? CancellationStatus.SUCCESS
+                : CancellationStatus.FAILED;
+
+        request.setStatus(status);
+        saveEvent(inquiryRefId, request, OutboxEventType.CANCELLATION_RESPONSE);
     }
 
-    public void processCheckAvailSeats(InventoryAvailabilityRequest request) {
+    @Transactional
+    public void processReservationRequest(UUID inquiryRefId, InventoryRequest request) {
         groupService.checkFindByGroupRefId(request.getGroupRefId());
-        InventoryStatus status = groupService.availFreeSeats(request.getGroupRefId(), request.getNumberOfSeats())
-                ? InventoryStatus.SEATS_AVAILABLE_FOR_BOOKING
-                : InventoryStatus.SEATS_NOT_AVAILABLE_FOR_BOOKING;
 
+        if (isAlreadyProcessed(inquiryRefId, OutboxEventType.INVENTORY_RESPONSE)) {
+            log.info("Request is already processed: {}", inquiryRefId);
+            return;
+        }
+
+        InventoryStatus status = groupService.attemptReservation(request.getGroupRefId(), request.getNumberOfSeats());
         saveEvent(
-                request.getInquiryRefId(),
-                new InventoryAvailabilityResponse(
-                        request.getInquiryRefId(),
+                inquiryRefId,
+                new InventoryResponse(
+                        inquiryRefId,
                         request.getGroupRefId(),
-                        status),
-                OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE
-        );
+                        status,
+                        InventoryStatus.ROLLBACK.equals(status) ? "Group Full" : ""),
+                OutboxEventType.INVENTORY_RESPONSE);
+    }
+
+    private boolean isAlreadyProcessed(UUID inquiryRefId, OutboxEventType eventType) {
+        return outboxEventService.existsByAggregateIdAndType(inquiryRefId, eventType);
     }
 
     private <T> void saveEvent(UUID requestId, T event, OutboxEventType eventType) {

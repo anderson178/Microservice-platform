@@ -9,8 +9,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryAvailabilityResponse {
+public class InventoryResponse {
     private UUID inquiryRefId;
     private UUID groupRefId;
     private InventoryStatus status;
+    private String reason;
 }

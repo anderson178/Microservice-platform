@@ -41,12 +41,12 @@ public class KafkaTestConfig {
     }
 
     @Bean
-    public NewTopic availabilityRequestTopic() {
-        return new NewTopic(OutboxEventType.INVENTORY_AVAILABILITY_REQUEST.getTopic(), 1, (short) 1);
+    public NewTopic requestTopic() {
+        return new NewTopic(OutboxEventType.INVENTORY_REQUEST.getTopic(), 1, (short) 1);
     }
 
     @Bean
-    public NewTopic availabilityResponseTopic() {
-        return new NewTopic(OutboxEventType.INVENTORY_AVAILABILITY_RESPONSE.getTopic(), 1, (short) 1);
+    public NewTopic responseTopic() {
+        return new NewTopic(OutboxEventType.INVENTORY_RESPONSE.getTopic(), 1, (short) 1);
     }
 }
