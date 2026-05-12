@@ -33,8 +33,8 @@ public class EventProcessorService {
     }
 
     @Transactional
-    public void processCancellationResponse(CancellationResponse response) {
-        Inquiry inquiry = inquiryService.findById(response.getId());
+    public void processCancellationResponse(UUID inquiryRefId, CancellationResponse response) {
+        Inquiry inquiry = inquiryService.findById(inquiryRefId);
 
         if (CancellationStatus.SUCCESS.equals(response.getStatus())) {
             inquiry.setStatus(InquiryStatus.CANCELLED);
@@ -47,18 +47,9 @@ public class EventProcessorService {
         updateProcess(inquiry);
     }
 
-    private <T> void saveEvent(UUID requestId, T event, OutboxEventType eventType) {
-        outboxEventService.saveEvent(
-                OutboxAggregateType.INQUIRY,
-                requestId,
-                eventType,
-                event
-        );
-    }
-
     @Transactional
-    public void processPaymentResponse(PaymentResponse response) {
-        Inquiry inquiry = inquiryService.findById(response.getInquiryRefId());
+    public void processPaymentResponse(UUID inquiryRefId, PaymentResponse response) {
+        Inquiry inquiry = inquiryService.findById(inquiryRefId);
 
         if (PaymentStatus.RECEIVED.equals(response.getStatus())) {
             inquiry.setStatus(InquiryStatus.PAYMENT);
@@ -74,5 +65,14 @@ public class EventProcessorService {
         inquiryService.update(inquiry.getId(), InquiryMapper.INSTANCE.update(inquiry));
 
         log.info("Updated inquiry status: id={}, newStatus={}", inquiry.getId(), inquiry.getStatus());
+    }
+
+    private <T> void saveEvent(UUID requestId, T event, OutboxEventType eventType) {
+        outboxEventService.saveEvent(
+                OutboxAggregateType.INQUIRY,
+                requestId,
+                eventType,
+                event
+        );
     }
 }

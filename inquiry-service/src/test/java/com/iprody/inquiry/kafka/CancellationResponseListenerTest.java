@@ -54,7 +54,7 @@ class CancellationResponseListenerTest {
 
         listener.consume(record, acknowledgment);
 
-        verify(eventProcessorService).processCancellationResponse(response);
+        verify(eventProcessorService).processCancellationResponse(inquiryId, response);
         verify(acknowledgment).acknowledge();
     }
 
@@ -71,23 +71,24 @@ class CancellationResponseListenerTest {
 
         listener.consume(record, acknowledgment);
 
-        verify(eventProcessorService).processCancellationResponse(response);
+        verify(eventProcessorService).processCancellationResponse(inquiryId, response);
         verify(acknowledgment).acknowledge();
     }
 
     @Test
     @DisplayName("should log error and NOT acknowledge when processing fails")
     void consume_processingFailure_logsErrorAndNoAck() {
+        UUID inquiryId = UUID.randomUUID();
         CancellationResponse response = new CancellationResponse();
-        response.setId(UUID.randomUUID());
+        response.setId(inquiryId);
 
         ConsumerRecord<String, CancellationResponse> record = createRecord("key", response);
         doThrow(new RuntimeException("DB error"))
-                .when(eventProcessorService).processCancellationResponse(response);
+                .when(eventProcessorService).processCancellationResponse(inquiryId, response);
 
         listener.consume(record, acknowledgment);
 
-        verify(eventProcessorService).processCancellationResponse(response);
+        verify(eventProcessorService).processCancellationResponse(inquiryId, response);
         verifyNoInteractions(acknowledgment);
     }
 

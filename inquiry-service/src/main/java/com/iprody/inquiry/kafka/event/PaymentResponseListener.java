@@ -11,6 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class PaymentResponseListener {
         }
 
         try {
-            eventProcessorService.processPaymentResponse(event);
+            eventProcessorService.processPaymentResponse(UUID.fromString(record.key()), event);
             ack.acknowledge();
             log.info("Response processed cancelled successfully for event={}", event);
         } catch (Exception e) {
