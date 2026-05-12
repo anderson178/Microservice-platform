@@ -20,7 +20,7 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Bean("outboxProducerFactory") // переименуем для универсальности
+    @Bean("outboxProducerFactory")
     public ProducerFactory<String, Object> outboxProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);

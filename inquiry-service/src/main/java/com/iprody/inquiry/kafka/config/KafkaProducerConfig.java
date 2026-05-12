@@ -1,6 +1,5 @@
 package com.iprody.inquiry.kafka.config;
 
-import com.iprody.common.kafka.CancellationRequest;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,8 +19,8 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Bean("cancellationProducerFactory")
-    public ProducerFactory<String, CancellationRequest> cancellationProducerFactory() {
+    @Bean("kafkaTemplateProducerFactory")
+    public ProducerFactory<String, Object> kafkaTemplateProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -30,8 +29,8 @@ public class KafkaProducerConfig {
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
-    @Bean("cancellationKafkaTemplate")
-    public KafkaTemplate<String, CancellationRequest> cancellationKafkaTemplate(ProducerFactory<String, CancellationRequest> producerFactory) {
+    @Bean("kafkaTemplate")
+    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 }
