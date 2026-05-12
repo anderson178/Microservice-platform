@@ -6,5 +6,7 @@ public enum InquiryStatus {
     PAYMENT,
     PAID,
     REJECTED,
-    CANCELLED
+    CANCELLED,
+    COMPLETED,
+    MANUAL_PROCESSING_REQUIRED
 }

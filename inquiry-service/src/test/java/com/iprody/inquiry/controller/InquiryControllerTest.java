@@ -55,10 +55,11 @@ class InquiryControllerTest {
         @DisplayName("200 when inquiry is saved successfully")
         void save_Success() throws Exception {
             InquiryDataDto inputDto = new InquiryDataDto();
-            inputDto.setProductRefId(UUID.randomUUID());
+            inputDto.setGroupRefId(UUID.randomUUID());
             inputDto.setCustomerRefId(UUID.randomUUID());
             inputDto.setManagerRefId(UUID.randomUUID());
             inputDto.setSource("WEB");
+            inputDto.setNumberOfSeats(2L);
 
             Inquiry savedInquiry = new Inquiry();
             savedInquiry.setId(UUID.randomUUID());
@@ -110,10 +111,11 @@ class InquiryControllerTest {
         @DisplayName("424 when external service is unavailable")
         void save_externalServiceUnavailable_returns424() throws Exception {
             InquiryDataDto validDto = new InquiryDataDto();
-            validDto.setProductRefId(UUID.randomUUID());
+            validDto.setGroupRefId(UUID.randomUUID());
             validDto.setCustomerRefId(UUID.randomUUID());
             validDto.setManagerRefId(UUID.randomUUID());
             validDto.setSource("WEB");
+            validDto.setNumberOfSeats(2L);
 
             when(inquiryService.save(any()))
                     .thenThrow(new ResourceAccessException("Connection refused: http://external-payment-service/api"));

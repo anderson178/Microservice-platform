@@ -38,9 +38,9 @@ public class PaymentResponseListener {
         try {
             eventProcessorService.processPaymentResponse(UUID.fromString(record.key()), event);
             ack.acknowledge();
-            log.info("Response processed cancelled successfully for event={}", event);
+            log.info("Payment response processed successfully for event={}", event);
         } catch (Exception e) {
-            log.error("Failed to process cancellation response for inquiryId={}: {}", record.key(), e.getMessage(), e);
+            log.error("Failed to process payment response for inquiryId={}: {}", record.key(), e.getMessage(), e);
         }
     }
 }

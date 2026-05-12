@@ -1,8 +1,7 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.inquiry.kafka.event;
 
 import com.iprody.common.kafka.CancellationResponse;
 import com.iprody.common.kafka.CancellationStatus;
-import com.iprody.inquiry.kafka.event.CancellationResponseListener;
 import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.service.ValidateService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -82,7 +81,7 @@ class CancellationResponseListenerTest {
         CancellationResponse response = new CancellationResponse();
         response.setId(inquiryId);
 
-        ConsumerRecord<String, CancellationResponse> record = createRecord("key", response);
+        ConsumerRecord<String, CancellationResponse> record = createRecord(inquiryId.toString(), response);
         doThrow(new RuntimeException("DB error"))
                 .when(eventProcessorService).processCancellationResponse(inquiryId, response);
 

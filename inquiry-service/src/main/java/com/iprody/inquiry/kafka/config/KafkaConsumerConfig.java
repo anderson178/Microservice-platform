@@ -1,6 +1,7 @@
 package com.iprody.inquiry.kafka.config;
 
 import com.iprody.common.kafka.CancellationResponse;
+import com.iprody.common.kafka.InventoryResponse;
 import com.iprody.common.kafka.PaymentResponse;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -70,6 +71,31 @@ public class KafkaConsumerConfig {
             ConsumerFactory<String, PaymentResponse> consumerFactory) {
 
         ConcurrentKafkaListenerContainerFactory<String, PaymentResponse> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        return factory;
+    }
+
+    @Bean("inventoryResponseConsumerFactory")
+    public ConsumerFactory<String, InventoryResponse> inventoryResponseConsumerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "inventory-inquiry-group");
+        JacksonJsonDeserializer<InventoryResponse> jsonDeserializer = new JacksonJsonDeserializer<>(InventoryResponse.class);
+        jsonDeserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(
+                configProps,
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(jsonDeserializer)
+        );
+    }
+
+    @Bean("inventoryResponseListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, InventoryResponse> inventoryResponseListenerContainerFactory(
+            ConsumerFactory<String, InventoryResponse> consumerFactory) {
+
+        ConcurrentKafkaListenerContainerFactory<String, InventoryResponse> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;

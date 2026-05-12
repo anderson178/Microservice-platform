@@ -93,7 +93,7 @@ class PaymentRequestListenerIntegrationTest {
 
                         assertThat(updatedInquiry.getStatus()).isNotEqualTo(InquiryStatus.PAYMENT);
                         assertThat(updatedInquiry.getNote())
-                                .contains("Payment rejected by external service: Insufficient funds");
+                                .contains("Insufficient funds");
                     });
         }
     }
@@ -170,7 +170,7 @@ class PaymentRequestListenerIntegrationTest {
         Inquiry inquiry = new Inquiry();
         inquiry.setCustomerRefId(UUID.randomUUID());
         inquiry.setManagerRefId(UUID.randomUUID());
-        inquiry.setProductRefId(UUID.randomUUID());
+        inquiry.setGroupRefId(UUID.randomUUID());
         inquiry.setStatus(status);
         inquiry.setSource("web");
 

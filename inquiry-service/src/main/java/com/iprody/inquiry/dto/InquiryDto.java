@@ -9,7 +9,6 @@ import java.util.UUID;
 @Data
 public class InquiryDto {
     private UUID id;
-    private UUID productRefId;
     private UUID customerRefId;
     private UUID groupRefId;
     private UUID managerRefId;
@@ -19,4 +18,5 @@ public class InquiryDto {
     private String note;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private Long numberOfSeats;
 }

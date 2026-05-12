@@ -1,9 +1,6 @@
 package com.iprody.inquiry.service;
 
-import com.iprody.common.kafka.CancellationRequest;
-import com.iprody.common.kafka.CancellationResponse;
-import com.iprody.common.kafka.CancellationStatus;
-import com.iprody.common.kafka.PaymentResponse;
+import com.iprody.common.kafka.*;
 import com.iprody.common.struct.PaymentStatus;
 import com.iprody.inquiry.mapper.InquiryMapper;
 import com.iprody.inquiry.model.Inquiry;
@@ -50,11 +47,36 @@ public class EventProcessorService {
     @Transactional
     public void processPaymentResponse(UUID inquiryRefId, PaymentResponse response) {
         Inquiry inquiry = inquiryService.findById(inquiryRefId);
+        inquiry.setStatus(paymentStatusMapping(response.getStatus()));
 
-        if (PaymentStatus.RECEIVED.equals(response.getStatus())) {
-            inquiry.setStatus(InquiryStatus.PAYMENT);
-        } else {
-            inquiry.setNote("Payment rejected by external service: " + response.getReason());
+        if (InquiryStatus.PAID.equals(inquiry.getStatus())) {
+            saveEvent(
+                    inquiryRefId,
+                    new InventoryRequest(inquiryRefId, inquiry.getGroupRefId(), inquiry.getNumberOfSeats()),
+                    OutboxEventType.INVENTORY_REQUEST
+            );
+        }
+
+        if (InquiryStatus.REJECTED.equals(inquiry.getStatus()) || InquiryStatus.CANCELLED.equals(inquiry.getStatus())) {
+            inquiry.setNote(response.getReason());
+        }
+
+        updateProcess(inquiry);
+    }
+
+    @Transactional
+    public void processInventoryResponse(UUID inquiryRefId, InventoryResponse response) {
+        Inquiry inquiry = inquiryService.findById(inquiryRefId);
+
+        if (InventoryStatus.RESERVED.equals(response.getStatus())) {
+            inquiry.setStatus(InquiryStatus.COMPLETED);
+        }
+
+        if (InventoryStatus.ROLLBACK.equals(response.getStatus())) {
+            inquiry.setStatus(StringUtils.isNoneBlank(response.getReason()) && response.getReason().contains("Group Full")
+                    ? InquiryStatus.MANUAL_PROCESSING_REQUIRED
+                    : InquiryStatus.REJECTED);
+            inquiry.setNote(response.getReason());
         }
 
         updateProcess(inquiry);
@@ -74,5 +96,22 @@ public class EventProcessorService {
                 eventType,
                 event
         );
+    }
+
+    private InquiryStatus paymentStatusMapping(PaymentStatus paymentStatus) {
+        switch (paymentStatus) {
+            case RECEIVED, PENDING -> {
+                return InquiryStatus.PAYMENT;
+            }
+            case DECLINED -> {
+                return InquiryStatus.CANCELLED;
+            }
+            case APPROVED -> {
+                return InquiryStatus.PAID;
+            }
+            default -> {
+                return InquiryStatus.REJECTED;
+            }
+        }
     }
 }

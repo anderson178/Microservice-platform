@@ -13,11 +13,6 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: product_ref_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
                   name: customer_ref_id
                   type: UUID
                   constraints:
@@ -25,6 +20,8 @@ databaseChangeLog:
               - column:
                   name: group_ref_id
                   type: UUID
+                  constraints:
+                    nullable: false
               - column:
                   name: manager_ref_id
                   type: UUID
@@ -40,7 +37,7 @@ databaseChangeLog:
                   type: VARCHAR(255)
               - column:
                   name: status
-                  type: VARCHAR(20)
+                  type: VARCHAR(50)
                   constraints:
                     nullable: false
               - column:

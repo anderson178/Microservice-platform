@@ -2,10 +2,12 @@ package com.iprody.inquiry;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Start inquiry app class.
  */
+@EnableScheduling
 @SpringBootApplication
 public class InquiryApp {
     private InquiryApp() {

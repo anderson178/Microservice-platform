@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0.0.2-add-number-of-seats
+      author: mironenko
+      changes:
+        - addColumn:
+            tableName: inquiry
+            columns:
+              - column:
+                  name: number_of_seats
+                  type: bigint
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            tableName: inquiry
+            columnName: number_of_seats
