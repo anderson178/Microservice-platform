@@ -1,6 +1,6 @@
 package com.iprody.inquiry.kafka.event;
 
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.common.kafka.PaymentResponse;
 import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.service.ValidateService;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentResponseListener {
-    private static final String TOPIC = KafkaEventRout.PAYMENT_RESPONSE;
+    private static final String TOPIC = KafkaEventTopic.PAYMENT_RESPONSE;
     private static final String CONTAINER_FACTORY = "paymentResponseListenerContainerFactory";
 
     private final EventProcessorService eventProcessorService;

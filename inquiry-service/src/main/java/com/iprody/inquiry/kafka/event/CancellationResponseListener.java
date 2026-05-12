@@ -1,7 +1,7 @@
 package com.iprody.inquiry.kafka.event;
 
 import com.iprody.common.kafka.CancellationResponse;
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.service.ValidateService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CancellationResponseListener {
-    private static final String TOPIC = KafkaEventRout.CANCELLATION_RESPONSE;
+    private static final String TOPIC = KafkaEventTopic.CANCELLATION_RESPONSE;
     private static final String CONTAINER_FACTORY = "cancellationListenerContainerFactory";
 
     private final EventProcessorService eventProcessorService;

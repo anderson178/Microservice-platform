@@ -1,6 +1,6 @@
 package com.iprody.payment.kafka.event;
 
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.common.utils.JsonStructUtils;
 import com.iprody.payment.kafka.dto.BankRequest;
 import com.iprody.payment.kafka.dto.BankResponse;
@@ -27,7 +27,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class BankingRequestListener {
-    private static final String TOPIC = KafkaEventRout.BANKING_REQUEST;
+    private static final String TOPIC = KafkaEventTopic.BANKING_REQUEST;
     private static final String GROUP = "payment-banking-request-group";
     private static final String CONTAINER_FACTORY = "bankingRequestListenerContainerFactory";
 

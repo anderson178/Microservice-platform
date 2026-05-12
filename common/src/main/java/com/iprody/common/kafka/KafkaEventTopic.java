@@ -1,7 +1,7 @@
 package com.iprody.common.kafka;
 
-public final class KafkaEventRout {
-    private KafkaEventRout() {
+public final class KafkaEventTopic {
+    private KafkaEventTopic() {
     }
 
     public static final String PAYMENT_REQUEST = "payment.request";

@@ -1,6 +1,6 @@
 package com.iprody.payment.kafka.event;
 
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.common.struct.PaymentStatus;
 import com.iprody.common.utils.JsonStructUtils;
 import com.iprody.payment.kafka.PaymentStillProcessingException;
@@ -28,7 +28,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class BankingRequestCheckStatusListener {
-    private static final String TOPIC = KafkaEventRout.BANKING_RESPONSE;
+    private static final String TOPIC = KafkaEventTopic.BANKING_RESPONSE;
     private static final String GROUP = "payment-banking-request-check-status-group";
     private static final String CONTAINER_FACTORY = "bankingResponseListenerContainerFactory";
 

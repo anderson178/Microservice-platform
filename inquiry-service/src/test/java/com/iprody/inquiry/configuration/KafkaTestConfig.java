@@ -1,6 +1,6 @@
 package com.iprody.inquiry.configuration;
 
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -38,12 +38,12 @@ public class KafkaTestConfig {
 
     @Bean
     public NewTopic paymentResponseTopic() {
-        return new NewTopic(KafkaEventRout.PAYMENT_RESPONSE, 1, (short) 1);
+        return new NewTopic(KafkaEventTopic.PAYMENT_RESPONSE, 1, (short) 1);
     }
 
     @Bean
     public NewTopic cancellationResponseTopic() {
-        return new NewTopic(KafkaEventRout.CANCELLATION_RESPONSE, 1, (short) 1);
+        return new NewTopic(KafkaEventTopic.CANCELLATION_RESPONSE, 1, (short) 1);
     }
 
     @Bean

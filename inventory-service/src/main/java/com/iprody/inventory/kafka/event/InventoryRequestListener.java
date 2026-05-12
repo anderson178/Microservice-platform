@@ -3,7 +3,7 @@ package com.iprody.inventory.kafka.event;
 import com.iprody.common.ResultCode;
 import com.iprody.common.exception.AppException;
 import com.iprody.common.kafka.InventoryRequest;
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.inventory.service.EventProcessorService;
 import com.iprody.inventory.service.ValidateService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class InventoryRequestListener {
-    public static final String TOPIC = KafkaEventRout.INVENTORY_REQUEST;
+    public static final String TOPIC = KafkaEventTopic.INVENTORY_REQUEST;
     public static final String CONTAINER_FACTORY = "inventoryRequestListenerContainerFactory";
 
     private final EventProcessorService eventProcessorService;

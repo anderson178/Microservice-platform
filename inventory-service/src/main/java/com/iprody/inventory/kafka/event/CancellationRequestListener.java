@@ -3,7 +3,7 @@ package com.iprody.inventory.kafka.event;
 import com.iprody.common.ResultCode;
 import com.iprody.common.exception.AppException;
 import com.iprody.common.kafka.CancellationRequest;
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.inventory.service.EventProcessorService;
 import com.iprody.inventory.service.ValidateService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class CancellationRequestListener {
-    public static final String TOPIC = KafkaEventRout.CANCELLATION_REQUEST;
+    public static final String TOPIC = KafkaEventTopic.CANCELLATION_REQUEST;
 
     private final EventProcessorService eventProcessorService;
     private final ValidateService validator;

@@ -1,6 +1,6 @@
 package com.iprody.inquiry.kafka;
 
-import com.iprody.common.kafka.KafkaEventRout;
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.common.kafka.PaymentResponse;
 import com.iprody.common.struct.PaymentStatus;
 import com.iprody.inquiry.configuration.KafkaTestConfig;
@@ -54,7 +54,7 @@ class PaymentRequestListenerIntegrationTest {
             response.setStatus(PaymentStatus.RECEIVED);
             response.setReason("Payment processed");
 
-            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventTopic.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -81,7 +81,7 @@ class PaymentRequestListenerIntegrationTest {
             response.setCurrency("USD");
             response.setReason("Insufficient funds");
 
-            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventTopic.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -110,7 +110,7 @@ class PaymentRequestListenerIntegrationTest {
             PaymentResponse response = new PaymentResponse();
             response.setStatus(PaymentStatus.RECEIVED);
 
-            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, UUID.randomUUID().toString(), response);
+            kafkaTemplate.send(KafkaEventTopic.PAYMENT_RESPONSE, UUID.randomUUID().toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -132,7 +132,7 @@ class PaymentRequestListenerIntegrationTest {
             response.setInquiryRefId(inquiryId);
             response.setReason("Test");
 
-            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, inquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventTopic.PAYMENT_RESPONSE, inquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
@@ -154,7 +154,7 @@ class PaymentRequestListenerIntegrationTest {
             response.setInquiryRefId(nonExistentInquiryId);
             response.setStatus(PaymentStatus.RECEIVED);
 
-            kafkaTemplate.send(KafkaEventRout.PAYMENT_RESPONSE, nonExistentInquiryId.toString(), response);
+            kafkaTemplate.send(KafkaEventTopic.PAYMENT_RESPONSE, nonExistentInquiryId.toString(), response);
             kafkaTemplate.flush();
 
             await()
