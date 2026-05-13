@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class InquiryFilterDto {
     private InquiryStatus status;
-    private UUID productRefId;
+    private UUID groupRefId;
     private UUID customerRefId;
     private UUID managerRefId;
 }

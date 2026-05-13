@@ -1,4 +1,4 @@
-package com.iprody.inquiry.kafka;
+package com.iprody.inquiry.kafka.event;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,7 +6,6 @@ import com.iprody.common.kafka.CancellationRequest;
 import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.inquiry.configuration.KafkaTestConfig;
 import com.iprody.inquiry.configuration.PostgresTestConfig;
-import com.iprody.inquiry.kafka.event.OutboxPublisher;
 import com.iprody.inquiry.model.OutboxAggregateType;
 import com.iprody.inquiry.model.OutboxEvent;
 import com.iprody.inquiry.model.OutboxEventStatus;

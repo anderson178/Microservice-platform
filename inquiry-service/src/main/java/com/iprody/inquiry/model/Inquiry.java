@@ -16,13 +16,10 @@ public class Inquiry {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "product_ref_id", nullable = false)
-    private UUID productRefId;
-
     @Column(name = "customer_ref_id", nullable = false)
     private UUID customerRefId;
 
-    @Column(name = "group_ref_id")
+    @Column(name = "group_ref_id", nullable = false)
     private UUID groupRefId;
 
     @Column(name = "manager_ref_id", nullable = false)
@@ -51,4 +48,7 @@ public class Inquiry {
     @Generated(event = EventType.INSERT)
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @Column(name = "number_of_seats")
+    private Long numberOfSeats;
 }

@@ -77,8 +77,9 @@ public class IntegrationInquiryTest {
             InquiryDataDto requestDto = new InquiryDataDto();
             requestDto.setManagerRefId(UUID.randomUUID());
             requestDto.setCustomerRefId(UUID.randomUUID());
-            requestDto.setProductRefId(UUID.randomUUID());
+            requestDto.setGroupRefId(UUID.randomUUID());
             requestDto.setSource("web");
+            requestDto.setNumberOfSeats(2L);
 
             InquiryDto responseDto = webClient.post()
                     .uri("/api/v1/inquires")
@@ -255,10 +256,11 @@ public class IntegrationInquiryTest {
         @DisplayName("should accept valid cancellation request, return 202, and publish to Kafka")
         void cancel_validInquiry_publishesToKafka() {
             InquiryDataDto createDto = new InquiryDataDto();
-            createDto.setProductRefId(UUID.randomUUID());
+            createDto.setGroupRefId(UUID.randomUUID());
             createDto.setCustomerRefId(UUID.randomUUID());
             createDto.setManagerRefId(UUID.randomUUID());
             createDto.setSource("WEB");
+            createDto.setNumberOfSeats(2L);
 
             InquiryDto created = webClient.post()
                     .uri("/api/v1/inquires")
@@ -361,10 +363,11 @@ public class IntegrationInquiryTest {
 
     private void createInquiryViaHttp(UUID customerId, UUID managerId) {
         InquiryDataDto dto = new InquiryDataDto();
-        dto.setProductRefId(UUID.randomUUID());
+        dto.setGroupRefId(UUID.randomUUID());
         dto.setCustomerRefId(customerId);
         dto.setManagerRefId(managerId);
         dto.setSource("web");
+        dto.setNumberOfSeats(2L);
 
         webClient.post()
                 .uri("/api/v1/inquires")

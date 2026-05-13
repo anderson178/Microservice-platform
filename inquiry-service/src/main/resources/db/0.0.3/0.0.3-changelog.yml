@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: 0.0.3-add_number_of_seats_to_inquiry_table.yml
+      relativeToChangelogFile: true

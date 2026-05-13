@@ -48,7 +48,6 @@ class InquiryRepoTest {
 
     private UUID testCustomerId;
     private UUID testManagerId;
-    private UUID testProductId;
     private UUID testGroupId;
 
     @BeforeEach
@@ -59,7 +58,6 @@ class InquiryRepoTest {
 
         testCustomerId = UUID.randomUUID();
         testManagerId = UUID.randomUUID();
-        testProductId = UUID.randomUUID();
         testGroupId = UUID.randomUUID();
     }
 
@@ -80,7 +78,6 @@ class InquiryRepoTest {
             assertThat(saved.getCreatedAt()).isNotNull();
             assertThat(saved.getCreatedAt()).isBeforeOrEqualTo(Timestamp.valueOf(LocalDateTime.now()));
             assertThat(saved.getStatus()).isEqualTo(InquiryStatus.NEW);
-            assertThat(saved.getProductRefId()).isEqualTo(testProductId);
             assertThat(saved.getCustomerRefId()).isEqualTo(testCustomerId);
             assertThat(saved.getManagerRefId()).isEqualTo(testManagerId);
             assertThat(saved.getSource()).isEqualTo("WEB");
@@ -120,14 +117,14 @@ class InquiryRepoTest {
         }
 
         @Test
-        @DisplayName("should fail when productRefId is null (NOT NULL constraint)")
+        @DisplayName("should fail when groupRefId is null (NOT NULL constraint)")
         void save_nullProductRefId_throwsException() {
             Inquiry inquiry = createValidInquiry();
-            inquiry.setProductRefId(null);
+            inquiry.setGroupRefId(null);
 
             assertThatThrownBy(() -> inquiryRepo.saveAndFlush(inquiry))
                     .isInstanceOf(DataIntegrityViolationException.class)
-                    .hasMessageContaining("null value in column \"product_ref_id\"");
+                    .hasMessageContaining("null value in column \"group_ref_id\"");
         }
 
         @Test
@@ -297,7 +294,7 @@ class InquiryRepoTest {
 
     private Inquiry createValidInquiry() {
         Inquiry inquiry = new Inquiry();
-        inquiry.setProductRefId(testProductId);
+        inquiry.setGroupRefId(testGroupId);
         inquiry.setCustomerRefId(testCustomerId);
         inquiry.setManagerRefId(testManagerId);
         inquiry.setSource("WEB");
