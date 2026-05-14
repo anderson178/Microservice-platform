@@ -1,5 +1,6 @@
 package com.iprody.payment.kafka.event;
 
+import com.iprody.common.kafka.KafkaEventTopic;
 import com.iprody.common.kafka.PaymentRequest;
 import com.iprody.payment.service.EventProcessorService;
 import com.iprody.payment.utils.ValidateService;
@@ -14,16 +15,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PaymentRequestListener {
-    private static final String TOPIC = "payment.request";
+    private static final String TOPIC = KafkaEventTopic.PAYMENT_REQUEST;
+    private static final String CONTAINER_FACTORY = "paymentRequestListenerContainerFactory";
 
     private final EventProcessorService eventProcessorService;
     private final ValidateService validator;
 
-    @KafkaListener(
-            topics = TOPIC,
-            groupId = "payment-inquiry-group",
-            containerFactory = "paymentRequestListenerContainerFactory"
-    )
+    @KafkaListener(topics = TOPIC, containerFactory = CONTAINER_FACTORY)
     public void consume(ConsumerRecord<String, PaymentRequest> record, Acknowledgment ack) {
         log.info("Received payment request with key={}", record.key());
         log.debug("Received payment request from topic: {}, partition: {}, offset: {}",

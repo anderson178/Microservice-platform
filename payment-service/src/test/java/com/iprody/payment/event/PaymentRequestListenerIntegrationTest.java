@@ -22,7 +22,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -79,7 +81,7 @@ class PaymentRequestListenerIntegrationTest {
 
         @Test
         @DisplayName("should handle idempotency: duplicate request with same inquiryRefId is ignored")
-        void consume_duplicateRequest_isIgnored_dueToIdempotency() {
+        void consume_duplicateRequest_isIgnored_dueToIdempotency() throws InterruptedException, ExecutionException, TimeoutException {
             UUID inquiryRefId = UUID.randomUUID();
             PaymentRequest request = createValidPaymentRequest(inquiryRefId);
 
@@ -87,16 +89,16 @@ class PaymentRequestListenerIntegrationTest {
                     OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
-            );
+            ).get(5, TimeUnit.SECONDS);
             // Duplicate
             kafkaTemplate.send(
                     OutboxEventType.PAYMENT_REQUEST.getTopic(),
                     inquiryRefId.toString(),
                     request
-            );
+            ).get(5, TimeUnit.SECONDS);
 
             await()
-                    .atMost(20, TimeUnit.SECONDS)
+                    .atMost(10, TimeUnit.SECONDS)
                     .pollInterval(500, TimeUnit.MILLISECONDS)
                     .untilAsserted(() -> {
                         List<Payment> payments = paymentRepo.findAllByInquiryRefId(inquiryRefId);
@@ -106,7 +108,7 @@ class PaymentRequestListenerIntegrationTest {
                         assertThat(saved.getPaymentStatus()).isEqualTo(PaymentStatus.RECEIVED);
 
                         List<OutboxEvent> events = outboxEventRepo.findByAggregateIdAndEventType(
-                                inquiryRefId, OutboxEventType.PAYMENT_REQUEST);
+                                inquiryRefId, OutboxEventType.PAYMENT_RESPONSE);
                         assertThat(events).hasSize(1);
                     });
         }

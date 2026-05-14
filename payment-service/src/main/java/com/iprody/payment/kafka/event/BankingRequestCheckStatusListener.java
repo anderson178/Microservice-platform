@@ -29,7 +29,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BankingRequestCheckStatusListener {
     private static final String TOPIC = KafkaEventTopic.BANKING_RESPONSE;
-    private static final String GROUP = "payment-banking-request-check-status-group";
     private static final String CONTAINER_FACTORY = "bankingResponseListenerContainerFactory";
 
     private final HTTPClientService httpClientService;
@@ -47,7 +46,7 @@ public class BankingRequestCheckStatusListener {
             kafkaTemplate = "kafkaTemplate",
             dltStrategy = DltStrategy.FAIL_ON_ERROR
     )
-    @KafkaListener(topics = TOPIC, groupId = GROUP, containerFactory = CONTAINER_FACTORY)
+    @KafkaListener(topics = TOPIC, containerFactory = CONTAINER_FACTORY)
     public void consume(ConsumerRecord<String, BankResponse> record, Acknowledgment ack) {
         UUID inquiryId = UUID.fromString(record.key());
         log.info("Checking status for inquiryRefId {}", inquiryId);

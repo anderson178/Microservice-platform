@@ -28,7 +28,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BankingRequestListener {
     private static final String TOPIC = KafkaEventTopic.BANKING_REQUEST;
-    private static final String GROUP = "payment-banking-request-group";
     private static final String CONTAINER_FACTORY = "bankingRequestListenerContainerFactory";
 
     private final ValidateService validator;
@@ -49,7 +48,7 @@ public class BankingRequestListener {
             kafkaTemplate = "kafkaTemplate",
             dltStrategy = DltStrategy.FAIL_ON_ERROR
     )
-    @KafkaListener(topics = TOPIC, groupId = GROUP, containerFactory = CONTAINER_FACTORY)
+    @KafkaListener(topics = TOPIC, containerFactory = CONTAINER_FACTORY)
     public void consume(ConsumerRecord<String, BankRequest> record, Acknowledgment ack) {
         log.info("Received banking request with key={}", record.key());
         log.debug("Received banking request from topic: {}, partition: {}, offset: {}",
