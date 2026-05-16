@@ -36,28 +36,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  payment-keycloak:
-    image: quay.io/keycloak/keycloak:23.0
-    command: [ "start-dev", "--import-realm" ]
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_HOSTNAME_STRICT=false
-      - KC_HTTP_ENABLED=true
-      - KC_HEALTH_ENABLED=true
-    ports:
-      - "8082:8080"
-    volumes:
-      - ./payment-service/keycloak:/opt/keycloak/data/import:ro
-      - payment-keycloak_data:/opt/keycloak/data
-    healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-
   customer-service:
     build:
       context: .
@@ -93,29 +71,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: unless-stopped
-
-  customer-keycloak:
-    image: quay.io/keycloak/keycloak:23.0
-    container_name: customer-keycloak
-    command: [ "start-dev", "--import-realm" ]
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_HOSTNAME_STRICT=false
-      - KC_HTTP_ENABLED=true
-      - KC_HEALTH_ENABLED=true
-    ports:
-      - "9082:8080"
-    volumes:
-      - ./customer-service/keycloak:/opt/keycloak/data/import:ro
-      - customer-keycloak_data:/opt/keycloak/data
-    healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     restart: unless-stopped
 
   inquiry-service:
@@ -155,29 +110,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  inquiry-keycloak:
-    image: quay.io/keycloak/keycloak:23.0
-    container_name: inquiry-keycloak
-    command: [ "start-dev", "--import-realm" ]
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_HOSTNAME_STRICT=false
-      - KC_HTTP_ENABLED=true
-      - KC_HEALTH_ENABLED=true
-    ports:
-      - "7082:8080"
-    volumes:
-      - ./inquiry-service/keycloak:/opt/keycloak/data/import:ro
-      - inquiry-keycloak_data:/opt/keycloak/data
-    healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-
   inventory-service:
     build:
       context: .
@@ -215,29 +147,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  inventory-keycloak:
-    image: quay.io/keycloak/keycloak:23.0
-    container_name: inventory-keycloak
-    command: [ "start-dev", "--import-realm" ]
-    environment:
-      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
-      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
-      - KC_HOSTNAME_STRICT=false
-      - KC_HTTP_ENABLED=true
-      - KC_HEALTH_ENABLED=true
-    ports:
-      - "6082:8080"
-    volumes:
-      - ./inventory-service/keycloak:/opt/keycloak/data/import:ro
-      - inventory-keycloak_data:/opt/keycloak/data
-    healthcheck:
-      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-
   kafka:
     image: apache/kafka:4.2.0
     container_name: kafka
@@ -270,13 +179,32 @@ services:
     depends_on:
       - kafka
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    command: [ "start-dev", "--import-realm" ]
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_HOSTNAME_STRICT=false
+      - KC_HTTP_ENABLED=true
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+      - keycloak_data:/opt/keycloak/data
+    healthcheck:
+      test: [ "CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3; cat <&3 | grep -q '200 OK'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
 volumes:
   payment-postgres_data:
-  payment-keycloak_data:
   customer-postgres_data:
-  customer-keycloak_data:
   inquiry-postgres_data:
-  inquiry-keycloak_data:
   inventory-postgres_data:
-  inventory-keycloak_data:
+  keycloak_data:
   kafka_data:
