@@ -1,3 +1,7 @@
+app:
+  keycloak:
+    url: http://localhost:8082
+
 server:
   port: 8080
 #server:
@@ -29,3 +33,11 @@ management:
     web:
       exposure:
         include: "health,metrics"
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: "readinessState,db,keycloak"

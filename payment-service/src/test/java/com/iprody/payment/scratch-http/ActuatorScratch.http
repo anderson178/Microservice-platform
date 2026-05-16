@@ -4,14 +4,17 @@ GET http://localhost:8080/actuator
 ### actuator helth
 GET http://localhost:8080/actuator/health
 
+### actuator readiness
+GET http://localhost:8080/actuator/health/readiness
+
+### actuator external
+GET http://localhost:8080/actuator/health/external
+
+### actuator liveness
+GET http://localhost:8080/actuator/health/liveness
+
 ### metrics
 GET http://localhost:8080/actuator/metrics
 
 ### metrics disk total
 GET http://localhost:8080/actuator/metrics/disk.total
-
-### actuator readiness
-GET http://localhost:8080/actuator/health/readiness
-
-### actuator liveness
-GET http://localhost:8080/actuator/health/liveness
