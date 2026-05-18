@@ -14,6 +14,8 @@ server:
 #    key-alias: customer-service-cert
 
 spring:
+  application:
+    name: customer-service
   jpa:
     hibernate:
       ddl-auto: validate
@@ -32,7 +34,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,metrics"
+        include: "health,metrics,prometheus"
   endpoint:
     health:
       show-details: always

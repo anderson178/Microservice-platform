@@ -1,5 +1,5 @@
 ### get api actuator
-GET http://localhost:8080/actuator
+GET http://localhost:8081/actuator
 
 ### actuator helth
 GET http://localhost:8080/actuator/health
@@ -10,6 +10,11 @@ GET http://localhost:8080/actuator/metrics
 ### metrics disk total
 GET http://localhost:8080/actuator/metrics/disk.total
 
+### actuator readiness
+GET http://localhost:8080/actuator/health/readiness
+
+### actuator liveness
+GET http://localhost:8080/actuator/health/liveness
 
 ### get api prometheus
-GET http://localhost:8083/actuator/prometheus
+GET http://localhost:8081/actuator/prometheus

@@ -201,6 +201,34 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.101.0
+    container_name: victoria-metrics
+    ports:
+      - "8428:8428"
+    volumes:
+      - vm_data:/victoria-metrics-data
+      - ./promscrape.yml:/etc/victoria-metrics/promscrape.yml
+    command:
+      - "-promscrape.config=/etc/victoria-metrics/promscrape.yml"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - victoria-metrics
+    restart: unless-stopped
+
 volumes:
   payment-postgres_data:
   customer-postgres_data:
@@ -208,3 +236,5 @@ volumes:
   inventory-postgres_data:
   keycloak_data:
   kafka_data:
+  vm_data:
+  grafana_data:

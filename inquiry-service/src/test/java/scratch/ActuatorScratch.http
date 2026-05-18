@@ -15,3 +15,6 @@ GET http://localhost:8080/actuator/health/readiness
 
 ### actuator liveness
 GET http://localhost:8080/actuator/health/liveness
+
+### get api prometheus
+GET http://localhost:8082/actuator/prometheus
