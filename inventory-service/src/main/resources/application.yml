@@ -20,3 +20,12 @@ spring:
     change-log: db/changelog-cumulative.yaml
     default-schema: inventory
     contexts: development
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics"
+  endpoint:
+    health:
+      show-details: always

@@ -42,7 +42,19 @@ spring:
       retries: 3
       properties:
         enable.idempotence: true
-  #logging:
-  #  level:
-  #    org.apache.kafka: DEBUG
-  #    org.springframework.kafka: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,metrics"
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: "readinessState,db,kafka"
+        external:
+          include: "payment-provider"
