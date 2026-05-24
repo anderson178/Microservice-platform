@@ -6,8 +6,9 @@ import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
 import com.iprody.inquiry.dto.InquiryRecordRequestDto;
-import com.iprody.inquiry.service.EventProcessorService;
 import com.iprody.inquiry.mapper.InquiryMapper;
+import com.iprody.inquiry.service.EventProcessorService;
+import com.iprody.inquiry.service.InquiryFacade;
 import com.iprody.inquiry.service.InquiryService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -16,6 +17,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "API for inquires")
@@ -31,18 +35,27 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/v1/inquires", produces = MediaType.APPLICATION_JSON_VALUE)
 public class InquiryController {
     private final InquiryService inquiryService;
+    private final InquiryFacade inquiryFacade;
     private final EventProcessorService eventProcessorService;
 
     @PostMapping
-    public InquiryDto save(@Valid @RequestBody InquiryDataDto dto) {
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public InquiryDto save(@Valid @RequestBody InquiryDataDto dto, Authentication authentication) {
+        String tokenValue = "";
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            tokenValue = jwtAuth.getToken().getTokenValue();
+        }
+
         return InquiryMapper.INSTANCE.toDto(
-                inquiryService.save(
-                        InquiryMapper.INSTANCE.toData(dto)
+                inquiryFacade.save(
+                        InquiryMapper.INSTANCE.toData(dto),
+                        tokenValue
                 )
         );
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResultList<InquiryDto> findAllByFilter(InquiryRecordRequestDto inquiryRecordRequestDto) {
         return InquiryMapper.INSTANCE.toDtoList(
                 inquiryService.findAllByFilter(
@@ -54,6 +67,7 @@ public class InquiryController {
     }
 
     @PostMapping("/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<Void> cancelInquiry(@Valid @RequestBody CancellationRequestDto dto) {
         eventProcessorService.processCancellationRequest(InquiryMapper.INSTANCE.fromCancellationRequestDto(dto));
 

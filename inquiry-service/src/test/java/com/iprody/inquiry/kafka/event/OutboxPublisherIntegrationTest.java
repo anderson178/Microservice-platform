@@ -20,10 +20,15 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
@@ -36,6 +41,9 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @Testcontainers
+@EnableMethodSecurity
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Import({PostgresTestConfig.class, KafkaTestConfig.class})
 @DisplayName("OutboxPublisher Integration Test")
 class OutboxPublisherIntegrationTest {
@@ -47,6 +55,9 @@ class OutboxPublisherIntegrationTest {
     private ObjectMapper objectMapper;
     @Autowired
     private OutboxPublisher outboxPublisher;
+
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
 
     private KafkaConsumer<String, Object> testConsumer;
 

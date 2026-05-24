@@ -14,8 +14,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
@@ -26,6 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@EnableMethodSecurity
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Testcontainers
 @Import({PostgresTestConfig.class, KafkaTestConfig.class})
 @DisplayName("PaymentRequestListener Integration Test")
@@ -34,6 +42,10 @@ class PaymentRequestListenerIntegrationTest {
     private KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired
     private InquiryRepo inquiryRepo;
+
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
+
 
     @BeforeEach
     void setUp() {

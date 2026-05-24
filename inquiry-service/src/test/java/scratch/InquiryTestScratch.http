@@ -1,0 +1,28 @@
+
+### get token for user
+POST http://localhost:8084/realms/iprody/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+username = admin &
+password = password123 &
+grant_type = password &
+client_id = iprody-public-client
+
+> {%
+    client.global.set("auth_access_token", response.body.access_token);
+    console.log(response.body.access_token)
+%}
+
+
+### save
+POST http://localhost:8082/api/v1/inquires
+Authorization: Bearer {{auth_access_token}}
+Content-Type: application/json
+
+{
+  "customerRefId": "564376a4-8558-4249-a454-3262bd7df165",
+  "managerRefId": "ea70139f-46e1-4f86-b96f-fdc47a22c943",
+  "groupRefId": "26deb803-f4e5-460a-a1a5-88f82140c796",
+  "source": "web",
+  "numberOfSeats": 2
+}

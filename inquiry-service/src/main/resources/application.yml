@@ -2,8 +2,6 @@ app:
   outbox:
     batch-size: 50
     poll-interval-ms: 20_000
-  keycloak:
-    url: http://localhost:8082
 
 server:
   port: 8082

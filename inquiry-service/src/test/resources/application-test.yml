@@ -1,0 +1,5 @@
+app:
+  keycloak:
+    url: http://keycloak-mock-server.local
+  customer-service:
+    url: http://customer-service-mock-server.local

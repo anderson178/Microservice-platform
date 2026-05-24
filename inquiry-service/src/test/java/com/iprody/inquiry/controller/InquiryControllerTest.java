@@ -2,11 +2,13 @@ package com.iprody.inquiry.controller;
 
 import com.iprody.common.ResultCode;
 import com.iprody.common.ResultList;
+import com.iprody.inquiry.KeyCloakRoles;
 import com.iprody.inquiry.configuration.ConfigurationTest;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.model.Inquiry;
 import com.iprody.inquiry.model.InquiryStatus;
 import com.iprody.inquiry.service.EventProcessorService;
+import com.iprody.inquiry.service.InquiryFacade;
 import com.iprody.inquiry.service.InquiryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MediaType;
@@ -15,13 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.ResourceAccessException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +52,21 @@ class InquiryControllerTest {
     @MockitoBean
     private EventProcessorService eventProcessorService;
 
+    @MockitoBean
+    private InquiryFacade inquiryFacade;
+
+
+    private SecurityMockMvcRequestPostProcessors.JwtRequestPostProcessor withRoles(String... roles) {
+        return org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt()
+                .jwt(jwt -> jwt
+                        .claim("realm_access", Map.of("roles", List.of(roles)))
+                        .claim("preferred_username", "test-user")
+                )
+                .authorities(Stream.of(roles)
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .toArray(org.springframework.security.core.GrantedAuthority[]::new)
+                );
+    }
 
     @Nested
     @DisplayName("POST /inquires")
@@ -65,16 +86,17 @@ class InquiryControllerTest {
             savedInquiry.setId(UUID.randomUUID());
             savedInquiry.setStatus(InquiryStatus.NEW);
 
-            when(inquiryService.save(any())).thenReturn(savedInquiry);
+            when(inquiryFacade.save(any(), anyString())).thenReturn(savedInquiry);
 
             mockMvc.perform(post("/api/v1/inquires")
                             .contentType(MediaType.APPLICATION_JSON.toString())
-                            .content(objectMapper.writeValueAsString(inputDto)))
+                            .content(objectMapper.writeValueAsString(inputDto))
+                            .with(withRoles(KeyCloakRoles.ADMIN)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(savedInquiry.getId().toString()))
                     .andExpect(jsonPath("$.status").value(InquiryStatus.NEW.name()));
 
-            verify(inquiryService).save(any());
+            verify(inquiryFacade).save(any(), anyString());
         }
     }
 
@@ -117,8 +139,8 @@ class InquiryControllerTest {
             validDto.setSource("WEB");
             validDto.setNumberOfSeats(2L);
 
-            when(inquiryService.save(any()))
-                    .thenThrow(new ResourceAccessException("Connection refused: http://external-payment-service/api"));
+            when(inquiryFacade.save(any(), anyString()))
+                    .thenThrow(new ResourceAccessException("Connection refused: http://external-service/api"));
 
             mockMvc.perform(post("/api/v1/inquires")
                             .contentType(MediaType.APPLICATION_JSON.toString())
@@ -128,7 +150,7 @@ class InquiryControllerTest {
                     .andExpect(jsonPath("$.code").value(ResultCode.EXTERNAL_SERVICE_UNAVAILABLE.name()))
                     .andExpect(jsonPath("$.message").isNotEmpty());
 
-            verify(inquiryService).save(any());
+            verify(inquiryFacade).save(any(), anyString());
         }
     }
 

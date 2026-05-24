@@ -1,4 +1,4 @@
-package com.iprody.customer.dto;
+package com.iprody.common.dto;
 
 import lombok.Data;
 

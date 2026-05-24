@@ -1,4 +1,16 @@
+app:
+  keycloak:
+    url: http://keycloak:8084
+  customer-service:
+    url: http://customer-service:9080
+
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8084/realms/iprody
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
   datasource:
     url: jdbc:postgresql://inquiry-postgres:5432/inquiry
     username: ${DB_USER}
