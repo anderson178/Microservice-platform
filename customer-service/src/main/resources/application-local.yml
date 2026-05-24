@@ -1,9 +1,13 @@
+app:
+  keycloak:
+    url: http://localhost:8084
+
 spring:
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8084/realms/iprody
+          issuer-uri: ${app.keycloak.url}/realms/iprody
           jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
   config:
     import: "optional:file:.env[.properties]"

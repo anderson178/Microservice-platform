@@ -5,7 +5,7 @@ import com.iprody.customer.configuration.ConfigurationTest;
 import com.iprody.customer.configuration.PostgresTestConfig;
 import com.iprody.customer.dto.ContractDataDto;
 import com.iprody.customer.dto.CustomerDataDto;
-import com.iprody.customer.dto.CustomerDto;
+import com.iprody.common.dto.CustomerDto;
 import com.iprody.customer.model.Customer;
 import com.iprody.customer.repository.ContractRepo;
 import com.iprody.customer.repository.CustomerRepo;
@@ -48,7 +48,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DisplayName("Customer Integration Tests (HTTP → Service → Repo → DB)")
 public class CustomerControllerIntegrationTest {
     @Autowired
-    private WebApplicationContext context; // Нужен для сборки клиента
+    private WebApplicationContext context;
 
     private WebTestClient webClient;
 

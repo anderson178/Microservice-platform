@@ -3,7 +3,7 @@ package com.iprody.customer.controller;
 import com.iprody.common.CommonMapper;
 import com.iprody.common.ResultList;
 import com.iprody.customer.dto.CustomerDataDto;
-import com.iprody.customer.dto.CustomerDto;
+import com.iprody.common.dto.CustomerDto;
 import com.iprody.customer.dto.CustomerRecordRequestDto;
 import com.iprody.customer.mapper.CustomerMapper;
 import com.iprody.customer.service.CustomerService;

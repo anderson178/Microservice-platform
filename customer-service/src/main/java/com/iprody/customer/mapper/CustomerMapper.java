@@ -6,7 +6,7 @@ import com.iprody.common.Sorting;
 import com.iprody.common.dto.SortingDto;
 import com.iprody.common.utils.EnumUtils;
 import com.iprody.customer.dto.CustomerDataDto;
-import com.iprody.customer.dto.CustomerDto;
+import com.iprody.common.dto.CustomerDto;
 import com.iprody.customer.dto.CustomerFilterDto;
 import com.iprody.customer.dto.CustomerSortFieldDto;
 import com.iprody.customer.model.Customer;
