@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,11 +33,13 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public CustomerDto getById(@PathVariable UUID id) {
         return CustomerMapper.INSTANCE.toDto(customerService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public CustomerDto save(@Valid @RequestBody CustomerDataDto dto) {
         return CustomerMapper.INSTANCE.toDto(
                 customerService.save(
@@ -46,6 +49,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public CustomerDto update(@PathVariable UUID id,
                               @Valid @RequestBody CustomerDataDto dto) {
         return CustomerMapper.INSTANCE.toDto(
@@ -57,6 +61,7 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResultList<CustomerDto> findAllByFilter(CustomerRecordRequestDto customerRecordRequestDto) {
         return CustomerMapper.INSTANCE.toDtoList(
                 customerService.findAllByFilter(

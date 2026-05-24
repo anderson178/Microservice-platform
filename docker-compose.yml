@@ -181,6 +181,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
     command: [ "start-dev", "--import-realm" ]
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
@@ -189,7 +190,7 @@ services:
       - KC_HTTP_ENABLED=true
       - KC_HEALTH_ENABLED=true
     ports:
-      - "8082:8080"
+      - "8084:8080"
     volumes:
       - ./keycloak:/opt/keycloak/data/import:ro
       - keycloak_data:/opt/keycloak/data

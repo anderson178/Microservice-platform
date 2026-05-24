@@ -2,6 +2,7 @@ package com.iprody.customer.integration;
 
 import com.iprody.common.ResultCode;
 import com.iprody.customer.configuration.ConfigurationTest;
+import com.iprody.customer.configuration.PostgresTestConfig;
 import com.iprody.customer.dto.ContractDataDto;
 import com.iprody.customer.dto.CustomerDataDto;
 import com.iprody.customer.dto.CustomerDto;
@@ -14,35 +15,41 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
+import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
 @AutoConfigureWebTestClient
+@EnableMethodSecurity
 @Testcontainers
 @Sql(scripts = {"/sql/init-schema.sql"})
-@Import(ConfigurationTest.class)
+@Import({ConfigurationTest.class, PostgresTestConfig.class})
 @DisplayName("Customer Integration Tests (HTTP → Service → Repo → DB)")
 public class CustomerControllerIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
-            .withInitScript("sql/init-schema.sql");
-
     @Autowired
+    private WebApplicationContext context; // Нужен для сборки клиента
+
     private WebTestClient webClient;
 
     @Autowired
@@ -54,10 +61,44 @@ public class CustomerControllerIntegrationTest {
     @Autowired
     private ContractRepo contractRepo;
 
+    @MockitoBean
+    private JwtDecoder jwtDecoder;
+
     @BeforeEach
     void setUp() {
         customerRepo.deleteAll();
         contractRepo.deleteAll();
+
+        Jwt mockJwt = Jwt.withTokenValue("mock-integration-token")
+                .header("alg", "none")
+                .claim("realm_access", Map.of("roles", List.of("ADMIN", "MANAGER")))
+                .claim("preferred_username", "test-user")
+                .build();
+
+        org.mockito.Mockito.when(jwtDecoder.decode(org.mockito.Mockito.anyString())).thenReturn(mockJwt);
+
+        this.webClient = MockMvcWebTestClient.bindToApplicationContext(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
+
+    /**
+     * IMPORTANT: Why do we use this method instead of the standard .with(jwt()) or .mutateWith(mockJwt()):
+     * <p>
+     * 1. Our project is written in Spring MVC (Servlet/Tomcat), but we use WebTestClient for tests.
+     * 2. The reactive mutator `.mutateWith(mockJwt())` is architecturally intended ONLY for WebFlux applications.
+     * In an MVC application, calling it results in a `NullPointerException` (httpHandlerBuilder is null).
+     * 3. To avoid framework conflicts, we pass a plain text Bearer token header.
+     * WebTestClient treats it as a standard string and does not fail with a compatibility error.
+     * 4. The actual role checking is performed by the @MockitoBean JwtDecoder bean, which intercepts
+     * this "mock-integration-token" string and inserts a ready-made Jwt object into the security context
+     * with ADMIN/MANAGER permissions configured in the setUp() method.
+     */
+    private Consumer<HttpHeaders> withFakeHeader() {
+        return headers -> {
+            // We use a dummy string. The real authorization is intercepted in the filter.
+            headers.setBearerAuth("mock-integration-token");
+        };
     }
 
     @Nested
@@ -67,6 +108,7 @@ public class CustomerControllerIntegrationTest {
         @Test
         @DisplayName("should create customer, return 200, and persist to DB")
         void create_success_andVerifyInDb() {
+            // Создание требует роль ADMIN
             CustomerDto responseCustomerDto = createCustomerViaHttp(
                     "Ivan",
                     "test@123.com",
@@ -93,6 +135,7 @@ public class CustomerControllerIntegrationTest {
 
             webClient.get()
                     .uri("/api/v1/customers/{id}", nonExistentId)
+                    .headers(withFakeHeader())
                     .exchange()
                     .expectStatus().isNotFound()
                     .expectBody()
@@ -108,6 +151,7 @@ public class CustomerControllerIntegrationTest {
             webClient.post()
                     .uri("/api/v1/customers")
                     .bodyValue(invalidDto)
+                    .headers(withFakeHeader())
                     .exchange()
                     .expectStatus().isBadRequest()
                     .expectBody()
@@ -135,6 +179,7 @@ public class CustomerControllerIntegrationTest {
                             .queryParam("sorting.sortField", "FULL_NAME")
                             .queryParam("sorting.sortDirection", "ASC")
                             .build())
+                    .headers(withFakeHeader())
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody()
@@ -160,6 +205,7 @@ public class CustomerControllerIntegrationTest {
             webClient.put()
                     .uri("/api/v1/customers/{id}", initialId)
                     .bodyValue(updateDto)
+                    .headers(withFakeHeader())
                     .exchange()
                     .expectStatus().isOk()
                     .expectBody();
@@ -179,6 +225,7 @@ public class CustomerControllerIntegrationTest {
             webClient.put()
                     .uri("/api/v1/customers/{id}", UUID.randomUUID())
                     .bodyValue(dto)
+                    .headers(withFakeHeader())
                     .exchange()
                     .expectStatus().isNotFound()
                     .expectBody()
@@ -197,6 +244,7 @@ public class CustomerControllerIntegrationTest {
         return webClient.post()
                 .uri("/api/v1/customers")
                 .bodyValue(customerDataDto)
+                .headers(withFakeHeader())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CustomerDto.class)

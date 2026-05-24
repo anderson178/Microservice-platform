@@ -1,8 +1,25 @@
+
+### get token for user
+POST http://localhost:8084/realms/iprody/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+username = admin &
+password = password123 &
+grant_type = password &
+client_id = iprody-public-client
+
+> {%
+    client.global.set("auth_access_token", response.body.access_token);
+    console.log(response.body.access_token)
+%}
+
 ### getById
 GET http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+Authorization: Bearer {{auth_access_token}}
 
 ### save
 POST http://localhost:8080/api/v1/customers
+Authorization: Bearer {{auth_access_token}}
 Content-Type: application/json
 
 {
@@ -15,6 +32,7 @@ Content-Type: application/json
 
 ### update
 PUT http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+Authorization: Bearer {{auth_access_token}}
 Content-Type: application/json
 
 {
@@ -35,3 +53,4 @@ GET http://localhost:8080/api/v1/customers/search
     &filter.fullName=DenisM
     &sorting.sortField=FULL_NAME
     &sorting.sortDirection=ASC
+Authorization: Bearer {{auth_access_token}}
