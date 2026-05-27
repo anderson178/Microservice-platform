@@ -49,6 +49,9 @@ spring:
       properties:
         enable.idempotence: true
 
+  config:
+    import: "application-logging.yml"
+
 management:
   endpoints:
     web:

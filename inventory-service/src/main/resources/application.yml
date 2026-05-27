@@ -17,6 +17,9 @@ spring:
         format_sql: true
         default_schema: inventory
 
+  config:
+    import: "application-logging.yml"
+
   liquibase:
     enabled: true
     change-log: db/changelog-cumulative.yaml

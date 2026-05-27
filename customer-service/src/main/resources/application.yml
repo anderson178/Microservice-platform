@@ -26,6 +26,9 @@ spring:
     default-schema: customer
     contexts: development
 
+  config:
+    import: "application-logging.yml"
+
 management:
   endpoints:
     web:
