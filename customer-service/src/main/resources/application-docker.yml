@@ -1,6 +1,6 @@
 app:
   keycloak:
-    url: http://keycloak:8084
+    url: http://keycloak:8080
 
 spring:
   security:

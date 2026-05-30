@@ -22,4 +22,4 @@ EXPOSE 8443
 # debug port
 EXPOSE 5005
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "app.jar"]

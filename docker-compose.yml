@@ -42,13 +42,14 @@ services:
       dockerfile: customer-service/Dockerfile
     container_name: customer-service
     ports:
-      - "9080:8080"
+      - "8080:8080"
       - "9443:8443"
       - "9005:5005"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - ZIPKIN_URL=http://zipkin:9411
     depends_on:
       customer-postgres:
         condition: service_healthy
@@ -79,13 +80,14 @@ services:
       dockerfile: inquiry-service/Dockerfile
     container_name: inquiry-service
     ports:
-      - "7080:8080"
+      - "8082:8082"
       - "7443:8443"
       - "7005:5005"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - ZIPKIN_URL=http://zipkin:9411
     depends_on:
       inquiry-postgres:
         condition: service_healthy
@@ -228,6 +230,18 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - victoria-metrics
+    restart: unless-stopped
+
+  zipkin:
+    image: openzipkin/zipkin:3.4
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9411 || exit 1" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
