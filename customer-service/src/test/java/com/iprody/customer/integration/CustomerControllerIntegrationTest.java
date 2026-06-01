@@ -23,6 +23,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -40,12 +41,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@AutoConfigureWebTestClient
 @EnableMethodSecurity
 @Testcontainers
+@ActiveProfiles("test")
 @Sql(scripts = {"/sql/init-schema.sql"})
 @Import({ConfigurationTest.class, PostgresTestConfig.class})
-@DisplayName("Customer Integration Tests (HTTP → Service → Repo → DB)")
+@DisplayName("Customer Integration Tests (HTTP -> Service -> Repo -> DB)")
 public class CustomerControllerIntegrationTest {
     @Autowired
     private WebApplicationContext context;

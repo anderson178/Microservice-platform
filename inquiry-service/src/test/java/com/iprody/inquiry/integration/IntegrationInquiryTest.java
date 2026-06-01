@@ -7,6 +7,7 @@ import com.iprody.common.kafka.CancellationRequest;
 import com.iprody.common.kafka.CancellationStatus;
 import com.iprody.inquiry.configuration.KafkaTestConfig;
 import com.iprody.inquiry.configuration.PostgresTestConfig;
+import com.iprody.inquiry.configuration.SecurityConfiguration;
 import com.iprody.inquiry.dto.CancellationRequestDto;
 import com.iprody.inquiry.dto.InquiryDataDto;
 import com.iprody.inquiry.dto.InquiryDto;
@@ -59,7 +60,6 @@ import static org.awaitility.Awaitility.await;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @AutoConfigureMockMvc
-@AutoConfigureWebTestClient
 @EnableMethodSecurity
 @Testcontainers
 @ActiveProfiles("test")
@@ -72,7 +72,6 @@ public class IntegrationInquiryTest {
     @Autowired
     private KafkaContainer kafka;
 
-    @Autowired
     private WebTestClient webClient;
 
     @Autowired
@@ -87,7 +86,7 @@ public class IntegrationInquiryTest {
     @MockitoBean
     private HTTPCustomerService httpCustomerService;
 
-    private UUID customerRefId = UUID.randomUUID();
+    private final UUID customerRefId = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
