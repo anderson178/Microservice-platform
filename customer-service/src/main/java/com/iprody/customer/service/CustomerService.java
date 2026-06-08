@@ -6,6 +6,9 @@ import com.iprody.customer.model.*;
 import com.iprody.customer.repository.ContractRepo;
 import com.iprody.customer.repository.CustomerRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ public class CustomerService {
     private final CustomerRepo customerRepo;
     private final ContractRepo contractRepo;
 
+    @CachePut(value = "customers", key = "#result.id")
     @Transactional
     public Customer save(CustomerData customerData) {
         ContractData contractData = customerData.getContract();
@@ -26,6 +30,7 @@ public class CustomerService {
         return customerRepo.save(new Customer(customerData.getFullName(), contractSaved));
     }
 
+    @Cacheable(value = "customers", key = "#id")
     @Transactional(readOnly = true)
     public Customer findById(UUID id) {
         return customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id));
@@ -38,9 +43,10 @@ public class CustomerService {
         );
     }
 
+    @CacheEvict(value = "customers", key = "#id")
     @Transactional
     public Customer update(UUID id, CustomerData customerData) {
-        Customer customerDb = findById(id);
+        Customer customerDb = customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id));
         customerDb.setFullName(customerData.getFullName());
         customerDb.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
         customerDb.getContract().setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
@@ -49,8 +55,9 @@ public class CustomerService {
         return customerRepo.save(customerDb);
     }
 
+    @CacheEvict(value = "customers", key = "#id")
     @Transactional
     public void delete(UUID id) {
-        customerRepo.delete(findById(id));
+        customerRepo.delete(customerRepo.findById(id).orElseThrow(() ->  new AppException(ResultCode.NOT_FOUND, id)));
     }
 }

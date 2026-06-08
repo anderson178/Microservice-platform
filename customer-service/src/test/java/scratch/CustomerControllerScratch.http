@@ -14,7 +14,7 @@ client_id = iprody-public-client
 %}
 
 ### getById
-GET http://localhost:8080/api/v1/customers/98908056-69fd-4733-8824-b91e39c37d19
+GET http://localhost:8080/api/v1/customers/eea8f8ec-ef28-4bae-8e8f-25f551071103
 Authorization: Bearer {{auth_access_token}}
 
 ### save
@@ -23,7 +23,7 @@ Authorization: Bearer {{auth_access_token}}
 Content-Type: application/json
 
 {
-  "fullName": "DenisM",
+  "fullName": "DenisM2",
   "contract": {
     "email": "124@mail.ru3",
     "phoneNumber": "+71234567893"

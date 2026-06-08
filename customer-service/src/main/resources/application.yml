@@ -19,15 +19,20 @@ spring:
       hibernate:
         format_sql: true
         default_schema: customer
-
   liquibase:
     enabled: true
     change-log: db/changelog-cumulative.yaml
     default-schema: customer
     contexts: development
-
   config:
     import: "application-logging.yml"
+  cache:
+    type: redis
+    redis:
+      time-to-live: 30m
+      cache-null-values: false
+      use-key-prefix: true
+      key-prefix: "customer:"
 
 management:
   endpoints:
