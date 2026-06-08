@@ -5,6 +5,10 @@ management:
     export:
       zipkin:
         endpoint: ${ZIPKIN_URL:http://localhost:9411}/api/v2/spans
+  metrics:
+    export:
+      logging:
+        step: 1 #minutes
 
 logging:
   pattern:
@@ -17,3 +21,4 @@ logging:
     com.iprody: INFO
     org.springframework.web: DEBUG
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    io.micrometer.core.instrument.logging.LoggingMeterRegistry: OFF

@@ -2,6 +2,10 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  metrics:
+    export:
+      logging:
+        step: 1 #minutes
 
 logging:
   pattern:
